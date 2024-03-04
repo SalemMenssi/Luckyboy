@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 import RadialGradient from 'react-native-radial-gradient';
 import {url} from '../url';
 import axios from 'axios';
+import {err} from 'react-native-svg/lib/typescript/xml';
 
 const Confirmation = ({card, close, getBookings}) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -32,6 +33,11 @@ const Confirmation = ({card, close, getBookings}) => {
         ...card,
         status: 'Refused',
       });
+      await sendNotification(
+        'Reservation order',
+        'Your Reservation Is Refused',
+      );
+
       await getBookings();
       close();
     } catch (error) {
@@ -44,7 +50,12 @@ const Confirmation = ({card, close, getBookings}) => {
         ...card,
         status: 'Confirmed',
       });
+      await sendNotification(
+        'Reservation order',
+        'Your Reservation Is Confirmed',
+      );
       await getBookings();
+
       close();
     } catch (error) {
       console.log(error);
@@ -79,20 +90,30 @@ const Confirmation = ({card, close, getBookings}) => {
     ];
     return months[month - 1] || 'Unknown';
   };
-
+  useEffect(() => {
+    console.log(card.client.fcmtoken[card.client.fcmtoken.length - 1]);
+  }, []);
+  const sendNotification = async (title, body) => {
+    const deviceToken = card.client.fcmtoken[card.client.fcmtoken.length - 1];
+    try {
+      await axios.post(`${url}/send-notification`, {deviceToken, title, body});
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <View
       style={{height: windowHeight * 0.7, backgroundColor: '#3C84AC'}}
       // colors={['#3C84AC', '#5AC2E3', '#3C84AC']}
     >
-      <TouchableOpacity style={[styles.return,{marginTop:`${Platform.OS==='ios' && '15%'}`}]} onPress={close}>
+      <TouchableOpacity style={styles.return} onPress={close}>
         <Image
           style={styles.arrowIcon}
           source={require('../assets/icons/fleche.png')}
         />
       </TouchableOpacity>
 
-      <Text style={[styles.heading,{marginTop:`${Platform.OS==='ios' && '30%'}`}]}>Reservation details</Text>
+      <Text style={styles.heading}>Reservation details</Text>
 
       <View style={styles.activitie}>
         <Image
@@ -102,7 +123,7 @@ const Confirmation = ({card, close, getBookings}) => {
             uri: `${url}${card.client.avatar && card.client.avatar.url}`,
           }}
         />
-        <Text style={styles.activityName}>{card.client.username}</Text>
+        <Text style={styles.activityName}>{card.client.fullName}</Text>
       </View>
       <View style={styles.activitiesInfo}>
         <ImageBackground
@@ -121,7 +142,7 @@ const Confirmation = ({card, close, getBookings}) => {
           source={require('../assets/images/detailsBox.png')}
           style={styles.line}>
           <Text style={styles.label}>Time</Text>
-          <Text style={styles.value}>{card.time.slice(0, 5)}</Text>
+          <Text style={styles.value}>{card.time.slice(0, 4)}</Text>
         </ImageBackground>
       </View>
 
@@ -172,13 +193,13 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
-  arrowIcon: {},
+  arrowIcon: {width: 40, resizeMode: 'contain', tintColor: '#fff'},
   heading: {
     alignSelf: 'center',
     fontSize: 36,
     fontFamily: 'OriginalSurfer-Regular',
     color: '#FFD466',
-    marginTop: windowHeight * 0.1,
+    marginTop: windowHeight * 0.15,
   },
   subheading: {
     textAlign: 'center',
@@ -246,7 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 10,
   },
-  return: {padding: 10, position: 'absolute', marginTop: 10, marginLeft: 10},
+  return: {padding: 10, position: 'absolute', marginTop: 40, marginLeft: 0},
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -257,8 +278,16 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
-    height: windowHeight * 0.4,
+    height: windowHeight * 0.35,
     width: windowWidth * 0.75,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 1,
+      height: 1,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
   modalImage: {
     width: 41,

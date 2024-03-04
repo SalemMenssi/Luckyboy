@@ -13,7 +13,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Icon1 from 'react-native-vector-icons/FontAwesome5';
+import Icon1 from 'react-native-vector-icons/FontAwesome';
 import LinearGradient from 'react-native-linear-gradient';
 import RadialGradient from 'react-native-radial-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,7 +22,6 @@ import axios from 'axios';
 import {url} from '../url';
 import ImagePicker from 'react-native-image-crop-picker';
 import RadioGroup from 'react-native-radio-buttons-group';
-Icon.loadFont();
 
 const AdminStore = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,6 +29,7 @@ const AdminStore = () => {
   const [modalCartVisible, setModalCartVisible] = useState(false);
   const [TitleChangingVisible, setTitleChangingVisible] = useState(false);
   const [DescChangingVisible, setDescChangingVisible] = useState(false);
+  const [CategoryChangingVisible, setCategoryChangingVisible] = useState(false);
   const [PriceChangingVisible, setPriceChangingVisible] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState({
@@ -44,7 +44,7 @@ const AdminStore = () => {
   const [Current, setCurrent] = useState({});
   const [NewProductName, setNewProductName] = useState('');
   const [NewProductPrice, setNewProductPrice] = useState('');
-  const [NewProductCategory, setNewProductCategory] = useState();
+  const [NewProductCategory, setNewProductCategory] = useState(0);
   const [NewProductImage, setNewProductImage] = useState({});
   const [DataToedit, setDataToedit] = useState('');
   const [NewProductImageToUpdate, setNewProductImageToUpdate] = useState({});
@@ -54,6 +54,7 @@ const AdminStore = () => {
   useEffect(() => {
     getCurrentUser();
     getProducts();
+    console.log(NewProductCategory);
   }, []);
 
   const getCurrentUser = async () => {
@@ -164,7 +165,7 @@ const AdminStore = () => {
 
       if (response.status === 200) {
         console.log('Image uploaded successfully', response.data.image);
-        return response.data.image;
+        setNewProductImage(response.data.image);
       } else {
         console.log('Image upload failed');
       }
@@ -180,15 +181,14 @@ const AdminStore = () => {
         cropping: true,
       });
 
-      let newImageToUpdate = await uploadImageToUpdate(image);
-      console.log(newImageToUpdate);
+      await uploadImageToUpdate(image);
       setSelectedProduct({
         ...selectedProduct,
-        image: newImageToUpdate,
+        image: NewProductImageToUpdate,
       });
       await axios.put(`${url}/api/product/${id}`, {
         ...selectedProduct,
-        image: newImageToUpdate,
+        image: NewProductImageToUpdate,
       });
       await getProducts();
     } catch (error) {
@@ -230,7 +230,7 @@ const AdminStore = () => {
 
       if (response.status === 200) {
         console.log('Image uploaded successfully', response.data.image);
-        return response.data.image;
+        setNewProductImageToUpdate(response.data.image);
       } else {
         console.log('Image upload failed');
       }
@@ -348,6 +348,22 @@ const AdminStore = () => {
       console.log(error);
     }
   };
+  const updateCategory = async id => {
+    try {
+      await axios.put(`${url}/api/product/${id}`, {
+        ...selectedProduct,
+        categorie: radioButtons[NewProductCategory - 1].value,
+      });
+      setSelectedProduct({
+        ...selectedProduct,
+        categorie: radioButtons[NewProductCategory - 1].value,
+      });
+      await getProducts();
+      setCategoryChangingVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleCategorySelection = category => {
     setSelectedCategory(category);
     console.log(filtredCard);
@@ -359,12 +375,13 @@ const AdminStore = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View
-        style={[styles.header, {backgroundColor: '#5AC2E3'}]}
-        // colors={['#3C84AC', '#5AC2E3', '#3C84AC']}
-      >
+      <LinearGradient
+        colors={['#0094B4', '#00D9F7']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={[styles.header]}>
         <Text style={styles.HeaderTitle}>Store</Text>
-      </View>
+      </LinearGradient>
 
       {/* Cards */}
       <View
@@ -416,23 +433,10 @@ const AdminStore = () => {
                     <Text style={styles.cardCategerie}>{card.categorie}</Text>
                     <Text style={styles.cardTitle}>{card.title}</Text>
                   </View>
-                  <TouchableOpacity
-                    style={{marginTop: 10}}
-                    onPress={() =>
-                      card.likes.includes(Current._id)
-                        ? UnlikeProdact(card)
-                        : likeProdact(card)
-                    }>
-                    <Icon
-                      name={
-                        card.likes.includes(Current._id)
-                          ? 'heart'
-                          : 'heart-outline'
-                      }
-                      size={30}
-                      color="#F68A72"
-                    />
-                  </TouchableOpacity>
+                  <View style={styles.likedBox}>
+                    <Text style={styles.likedValue}>{card.likes.length}</Text>
+                    <Icon name={'heart'} size={30} color="#F68A72" />
+                  </View>
                 </View>
                 <View style={styles.Cardtaile}>
                   <Text style={styles.cardPrice}>{`${card.price} DT`}</Text>
@@ -440,11 +444,11 @@ const AdminStore = () => {
                   <TouchableOpacity
                     onPress={() => handleBuy(card)}
                     style={styles.cardButton}>
-                    <Icon
+                    <Icon1
                       style={styles.basketIcon}
                       size={20}
                       color="#fff"
-                      name="create-outline"
+                      name="edit"
                     />
                   </TouchableOpacity>
                 </View>
@@ -534,6 +538,27 @@ const AdminStore = () => {
                 </TouchableOpacity>
               </View>
               <View style={[styles.Row, {marginTop: windowHeight * 0.06}]}>
+                <Text style={[styles.About, {marginRight: 10}]}>Category</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    let newCategory =
+                      selectedProduct.categorie == 'Equipment'
+                        ? '1'
+                        : selectedProduct.categorie == 'Tools'
+                        ? '2'
+                        : '3';
+                    setNewProductCategory(newCategory);
+                    console.log(NewProductCategory);
+                    setCategoryChangingVisible(true);
+                  }}>
+                  <Image source={require('../assets/icons/edit.png')} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.description}>
+                {selectedProduct && selectedProduct.categorie}
+              </Text>
+              <View style={[styles.Row, {marginTop: windowHeight * 0.06}]}>
                 <Text style={[styles.About, {marginRight: 10}]}>
                   Description
                 </Text>
@@ -562,7 +587,7 @@ const AdminStore = () => {
           style={[styles.RadialEffect, {backgroundColor: '#FFC444'}]}
           // colors={['#FFC444', '#FEE6C2', '#FFC444']}
         >
-          <Icon name="cart" size={25} color="#383E44" />
+          <Icon1 name="cart-plus" size={25} color="#383E44" />
         </View>
       </TouchableOpacity>
 
@@ -574,13 +599,7 @@ const AdminStore = () => {
         onRequestClose={() => setModalCartVisible(false)}>
         <View style={styles.cartContainer}>
           <View style={styles.formContainer}>
-            <Text
-              style={[
-                styles.formTitle,
-                {marginTop: `${Platform.OS === 'ios' && '15%'}`},
-              ]}>
-              Add Item{' '}
-            </Text>
+            <Text style={styles.formTitle}>Add Item </Text>
             <Text style={styles.formSubTitle}>Name</Text>
             <TextInput
               style={styles.input}
@@ -708,6 +727,47 @@ const AdminStore = () => {
       <Modal
         animationType="slide"
         transparent={true}
+        visible={CategoryChangingVisible}
+        onRequestClose={() => setCategoryChangingVisible(false)}>
+        <View style={styles.AlertmodalContainer}>
+          <View
+            style={[
+              styles.AlertmodalContent,
+              {justifyContent: 'space-around'},
+            ]}>
+            <Image
+              source={require('../assets/icons/edit.png')} // Replace with your image source
+              style={styles.AlertmodalImage}
+            />
+            <Text style={styles.AlertmodalTitle}>Edit{NewProductCategory}</Text>
+            <RadioGroup
+              radioButtons={radioButtons}
+              onPress={setNewProductCategory}
+              selectedId={NewProductCategory}
+              containerStyle={{
+                alignSelf: 'flex-start',
+                marginLeft: windowWidth * 0.1,
+              }}
+            />
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.exitModalButton, styles.cancelButton]}
+                onPress={() => setCategoryChangingVisible(false)}>
+                <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => updateCategory(selectedProduct._id)}
+                style={styles.exitModalButton}>
+                <Text style={[styles.buttonText, {color: '#F68A72'}]}>Yes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
         visible={DescChangingVisible}
         onRequestClose={() => setDescChangingVisible(false)}>
         <View style={styles.AlertmodalContainer}>
@@ -800,7 +860,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 5,
     fontWeight: '500',
     alignSelf: 'center',
-    marginBottom: windowHeight * 0.15,
+    marginBottom: windowHeight * 0.015,
     fontFamily: 'OriginalSurfer-Regular',
     letterSpacing: 2,
   },
@@ -817,7 +877,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderColor: '#000',
     marginVertical: 10,
-    height: windowHeight * 0.35,
+    height: windowHeight * 0.3,
     width: windowWidth * 0.43,
     borderRadius: 13,
     zIndex: 100,
@@ -839,8 +899,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '40%',
     paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingVertical: 20,
     backgroundColor: 'rgba(0,0,0,0.5)',
+    transform: 'scale(1.05)',
   },
   content: {
     flexDirection: 'row',
@@ -849,18 +910,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ContentHead: {justifyContent: 'center'},
-  cardCategerie: {color: '#ccebff', fontSize: 16, marginHorizontal: 10},
+  cardCategerie: {color: '#ccebff', fontSize: 10, marginHorizontal: 10},
   Cardtaile: {
     flexDirection: 'row',
     marginVertical: 5,
     width: '100%',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    top: 20,
   },
   cardTitle: {
-    fontFamily: 'OriginalSurfer-Regular',
-    fontSize: 20,
+    fontFamily: 'Poppins-Regular',
+
+    fontSize: 16,
     color: '#fff',
     marginVertical: 0,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
@@ -869,7 +929,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {},
   cardButton: {
-    backgroundColor: '#5AC2E3',
+    backgroundColor: 'transparent',
     borderRadius: 5,
     flexDirection: 'row',
     elevation: 5,
@@ -877,10 +937,11 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    width: '25%',
+    width: '20%',
     height: '123%',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
   },
   cardButtonText: {
     color: '#fff',
@@ -889,7 +950,7 @@ const styles = StyleSheet.create({
   },
   cardPrice: {
     color: '#FFD466',
-    fontSize: 20,
+    fontSize: 24,
     textShadowColor: 'rgba(255, 255, 255, 0.5)',
     textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1.5,
@@ -954,10 +1015,10 @@ const styles = StyleSheet.create({
   },
   basketButton: {
     position: 'absolute',
-    top: windowHeight * 0.07,
+    top: 60,
     right: 20,
     borderRadius: 50,
-    width: 70,
+    width: 60,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
@@ -1003,7 +1064,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     paddingVertical: 20,
     paddingHorizontal: 10,
-    top: windowHeight * -0.15,
+    top: windowHeight * -0.1,
     backgroundColor: '#fefefe',
     borderRadius: 40,
   },
@@ -1097,7 +1158,7 @@ const styles = StyleSheet.create({
   header: {
     position: 'relative',
     width: windowWidth,
-    height: windowHeight * 0.4,
+    height: windowHeight * 0.35,
     backgroundColor: '#b3e0ff',
     justifyContent: 'center',
   },
@@ -1128,7 +1189,6 @@ const styles = StyleSheet.create({
     color: '#F68A72',
     fontSize: 24,
     fontWeight: 'bold',
-    marginHorizontal: 10,
   },
   price: {
     color: '#FFD466',
@@ -1174,14 +1234,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex: 10,
     marginHorizontal: 20,
-    marginVertical: 60,
+    marginVertical: 20,
   },
-  arrowIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#000',
-    resizeMode: 'contain',
-  },
+
+  arrowIcon: {width: 40, resizeMode: 'contain'},
+
   imageContainer: {
     width: windowWidth,
     height: windowHeight * 0.55,
@@ -1227,7 +1284,7 @@ const styles = StyleSheet.create({
     color: '#F68A72',
     fontSize: 24,
     fontWeight: 'bold',
-    marginHorizontal: 10,
+    marginHorizontal: 3,
   },
   price: {
     color: '#FFD466',
@@ -1240,9 +1297,9 @@ const styles = StyleSheet.create({
   description: {
     color: '#666',
     fontSize: 16,
-    lineHeight: windowHeight * 0.03,
+
     fontFamily: 'OriginalSurfer-Regular',
-    marginVertical: 5,
+    marginTop: 5,
     paddingHorizontal: windowWidth * 0.05,
   },
 
@@ -1281,7 +1338,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: 'OriginalSurfer-Regular',
     color: '#383E44',
-    marginTop: windowHeight * 0.05,
+    marginTop: windowHeight * 0.1,
     alignSelf: 'center',
   },
   formSubTitle: {
@@ -1365,6 +1422,9 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 1, height: 1},
     shadowOpacity: 1,
     shadowRadius: 5,
+  },
+  likedBox: {
+    flexDirection: 'row',
   },
 });
 

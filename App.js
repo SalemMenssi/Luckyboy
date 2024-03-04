@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import {Animated, Dimensions} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome5';
+import {Animated, Dimensions, Image} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   SignIn,
   SignUp,
@@ -20,10 +21,11 @@ import {
   Loading,
   ServicesAdmin,
 } from './screens';
+import messaging from '@react-native-firebase/messaging';
 const {height, width} = Dimensions.get('window');
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-Icon.loadFont();
+
 const User = () => {
   return (
     <Tab.Navigator
@@ -72,27 +74,102 @@ const User = () => {
       <Tab.Screen
         name="Event"
         component={ReservationHistory}
-        options={{tabBarLabel: () => null}}
-      />
-      <Tab.Screen
-        name="Profil"
-        component={Profile}
-        options={{tabBarLabel: () => null}}
-      />
-      <Tab.Screen
-        name="Store"
-        component={Store}
-        options={{tabBarLabel: () => null}}
-      />
-      <Tab.Screen
-        name="Blog"
-        component={Blog}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activstar.png')
+                    : require('./assets/TapBarIcon/star.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Reserve"
         component={Reservation}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activscheduel.png')
+                    : require('./assets/TapBarIcon/scheduel.png')
+                }
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Store"
+        component={Store}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activchart.png')
+                    : require('./assets/TapBarIcon/chart.png')
+                }
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Blog"
+        component={Blog}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activblog.png')
+                    : require('./assets/TapBarIcon/blog.png')
+                }
+              />
+            );
+          },
+        }}
+      />
+      <Tab.Screen
+        name="Profil"
+        component={Profile}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activprofile.png')
+                    : require('./assets/TapBarIcon/profile.png')
+                }
+              />
+            );
+          },
+        }}
       />
     </Tab.Navigator>
   );
@@ -144,32 +221,122 @@ const Admin = () => {
       <Tab.Screen
         name="Chart"
         component={Chart}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activcart.png')
+                    : require('./assets/TapBarIcon/cart.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Reservation-Stat"
         component={ReservationAdmin}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activscheduel.png')
+                    : require('./assets/TapBarIcon/scheduel.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Events"
         component={EventAdmin}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activevent.png')
+                    : require('./assets/TapBarIcon/event.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Services"
         component={ServicesAdmin}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size + 1, height: size + 1, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activservice.png')
+                    : require('./assets/TapBarIcon/service.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Store"
         component={AdminStore}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activchart.png')
+                    : require('./assets/TapBarIcon/chart.png')
+                }
+              />
+            );
+          },
+        }}
       />
       <Tab.Screen
         name="Blog"
         component={Blog}
-        options={{tabBarLabel: () => null}}
+        options={{
+          title: '',
+          tabBarIcon: ({size, focused, color}) => {
+            return (
+              <Image
+                resizeMode="contain"
+                style={{width: size, height: size, top: 15}}
+                source={
+                  focused
+                    ? require('./assets/TapBarIcon/activblog.png')
+                    : require('./assets/TapBarIcon/blog.png')
+                }
+              />
+            );
+          },
+        }}
       />
     </Tab.Navigator>
   );
@@ -190,6 +357,69 @@ const MyStack = () => {
 };
 
 const App = () => {
+  const requestUserPermission = async () => {
+    try {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (enabled) {
+        console.log('Authorization status:', authStatus);
+      } else {
+        console.warn('User did not grant permission for notifications.');
+      }
+    } catch (error) {
+      console.error('Error requesting permission:', error);
+    }
+  };
+
+  messaging().onMessage(async remoteMessage => {
+    try {
+      const notifications = JSON.parse(
+        (await AsyncStorage.getItem('notifs')) || '[]',
+      );
+
+      const newNotificationArray = JSON.stringify([
+        ...notifications,
+        remoteMessage.notification,
+      ]);
+
+      await AsyncStorage.setItem('notifs', newNotificationArray);
+
+      console.log(
+        'Notification data saved to AsyncStorage',
+        remoteMessage.notification,
+      );
+    } catch (error) {
+      console.error('Error saving notification data to AsyncStorage:', error);
+    }
+  });
+
+  messaging().onNotificationOpenedApp(remoteMessage => {
+    try {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage.notification,
+      );
+    } catch (error) {
+      console.error('Error handling notification opening:', error);
+    }
+  });
+
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    try {
+      console.log('Message handled in the background!', remoteMessage);
+      // Save the notification data to AsyncStorage or handle as needed
+    } catch (error) {
+      console.error('Error handling background message:', error);
+    }
+  });
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
   return (
     <NavigationContainer>
       <MyStack />

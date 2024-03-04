@@ -183,7 +183,11 @@ const Blog = () => {
             <View key={post._id} style={styles.postCard}>
               <View style={styles.Content}>
                 <View style={styles.postHeader}>
-                  <Text style={styles.cardTitle}>{post.title}</Text>
+                  <Text style={styles.cardTitle}>
+                    {post.title.length > 15
+                      ? post.title.slice(0, 10).concat('...')
+                      : post.title}
+                  </Text>
 
                   <View style={styles.LikeAndPriceContainer}>
                     <Text style={styles.cardDate}>
@@ -211,8 +215,10 @@ const Blog = () => {
                 </View>
 
                 <Text style={styles.cardDescription}>
-                  {post.contents.length > 100
-                    ? post.contents.slice(0, 99).concat('...')
+                  {post.contents.split('\n').length >= 1
+                    ? post.contents.split('\n')[0]
+                    : post.contents.length > 30
+                    ? post.contents.slice(0, 20).concat('...')
                     : post.contents}
                 </Text>
                 <TouchableOpacity
@@ -227,7 +233,7 @@ const Blog = () => {
 
               <Image
                 source={{uri: `${url}${post.image.url}`}}
-                style={styles.cardImageDisplay}
+                style={styles.cardImage}
                 resizeMode="cover"
               />
             </View>
@@ -238,11 +244,11 @@ const Blog = () => {
         onPress={() => setModalVisible(true)}>
         <View
           style={{
-            width: '100%',
+            /*width: '100%',
             height: '100%',
-            alignItems: 'center',
+            alignItems: 'center',*/
             justifyContent: 'center',
-            backgroundColor: '#3C84AC',
+            backgroundColor: '#5AC2E3',
           }}>
           <Text style={styles.addPostText}>+</Text>
         </View>
@@ -360,7 +366,7 @@ const Blog = () => {
                 maxHeight: windowHeight * 0.6,
               },
             ]}
-            resizeMode="cover"
+            resizeMode="contain"
           />
           <TouchableOpacity
             style={styles.close}
@@ -389,38 +395,35 @@ const styles = StyleSheet.create({
     color: '#383E44',
     fontFamily: 'OriginalSurfer-Regular',
     fontSize: 46,
+    alignSelf: 'flex-start',
     alignSelf: 'center',
-    marginHorizontal: 20,
-    marginTop: windowHeight * 0.05,
+    marginBottom: 10,
+    marginTop: windowHeight * 0.04,
   },
   postCard: {
-    height: windowHeight * 0.5,
+    alignSelf: 'center',
+    maxHeight: windowHeight * 0.5,
     width: windowWidth * 0.8,
     borderRadius: 20,
+    position: 'relative',
     marginVertical: 20,
     justifyContent: 'space-between',
-    alignSelf: 'center',
     backgroundColor: 'white',
     elevation: 10,
     shadowColor: '#000',
     shadowOffset: {
-      width: 2,
+      width: 0,
       height: 2,
     },
     shadowOpacity: 0.5,
     shadowRadius: 10,
   },
-  cardImageDisplay: {
+  cardImage: {
     width: '100%',
-    height: '70%',
+    height: '65%',
     borderBottomEndRadius: 20,
     borderBottomStartRadius: 20,
-    overflow: 'hidden', // Apply overflow to the cardImage
-    position: 'absolute',
-
-    bottom: 0,
   },
-  cardImage: {width: '100%', height: '100%'},
   Content: {},
   postHeader: {
     flexDirection: 'row',
@@ -431,7 +434,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: '#383E44',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     fontSize: 30,
     width: '70%',
   },
@@ -462,7 +465,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     alignItems: 'center',
   },
-  likeIcon: {height: windowWidth * 0.07, width: windowWidth * 0.07},
+  likeIcon: {height: windowWidth * 0.07, width: windowWidth * 0.07, top: 2},
   likedValue: {
     fontFamily: 'OriginalSurfer-Regular',
     color: '#383E44',
@@ -478,10 +481,10 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: 'OriginalSurfer-Regular',
     color: '#000',
-    fontSize: 36,
+    fontSize: 40,
     alignSelf: 'center',
     marginBottom: windowHeight * 0.05,
-    marginTop: windowHeight * 0.05,
+    marginTop: windowHeight * 0.07,
   },
   label: {
     fontFamily: 'OriginalSurfer-Regular',
@@ -521,9 +524,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     height: '100%',
     fontSize: 46,
+    paddingTop: 5,
+    textAlign: 'center',
   },
-  close: {position: 'absolute', top: windowHeight * 0.09, left: 20},
-  arrowIcon: {width: 20, height: 20},
+  close: {position: 'absolute', top: 60, left: 20},
+  arrowIcon: {width: 40, resizeMode: 'contain'},
   aploadContainer: {flexDirection: 'row'},
   reserveButton: {
     borderRadius: 60,

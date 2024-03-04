@@ -16,7 +16,7 @@ import jwtDecode from 'jwt-decode';
 import {url} from '../url';
 import axios from 'axios';
 import Confirmation from './Confirmation';
-Icon.loadFont();
+
 const ReservationAdmin = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -67,27 +67,23 @@ const ReservationAdmin = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text
-        style={[
-          styles.title,
-          {marginTop: `${Platform.OS === 'ios' && '25%'}`},
-        ]}>
-        Reservation History
-      </Text>
+      <Text style={styles.title}>Reservation History</Text>
 
       {/* Cards */}
 
       <View style={styles.cards} showsVerticalScrollIndicator={false}>
-        {Bookings.map(card => (
+        {Bookings.reverse().map(card => (
           <View style={styles.card} key={card._id}>
             <Image
-              source={{uri: `${url}${card.service.image.url}`}}
+              source={{uri: `${url}${card.service && card.service.image.url}`}}
               style={styles.cardImage}
               resizeMode="cover"
             />
 
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{card.service.title}</Text>
+              <Text style={styles.cardTitle}>
+                {card.service && card.service.title}
+              </Text>
               <Text style={styles.contentStyle}>
                 {card.date.slice(0, 10)} {card.time}
               </Text>
@@ -140,8 +136,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: 'OriginalSurfer-Regular',
     color: '#383E44',
-    marginTop: windowHeight * 0.05,
-    marginBottom: windowHeight * 0.09,
+    marginTop: windowHeight * 0.09,
+    marginBottom: windowHeight * 0.05,
     alignSelf: 'center',
   },
 
@@ -154,21 +150,20 @@ const styles = StyleSheet.create({
     width: windowWidth * 0.87,
     marginVertical: 15,
     elevation: 5,
-    //overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
 
   cardImage: {
     width: '36%',
     height: '100%',
-    borderBottomStartRadius: 20,
-    borderTopStartRadius: 20,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
   },
   cardContent: {
     width: '60%',

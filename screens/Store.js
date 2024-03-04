@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
 import axios from 'axios';
 import {url} from '../url';
-Icon.loadFont();
+
 const Store = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalCartVisible, setModalCartVisible] = useState(false);
@@ -121,9 +121,13 @@ const Store = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={[styles.header, {backgroundColor: '#28B0DB'}]}>
+      <LinearGradient
+        colors={['#0094B4', '#00D9F7']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={[styles.header]}>
         <Text style={styles.HeaderTitle}>Store</Text>
-      </View>
+      </LinearGradient>
 
       {/* Cards */}
       <View style={styles.cardContainer}>
@@ -152,61 +156,80 @@ const Store = () => {
         </ScrollView>
 
         {/* Popular */}
-        <Text style={styles.subtitle}>Popular</Text>
-
-        <ScrollView
-          contentContainerStyle={[
-            styles.categoryScrollContainer,
-            {flexWrap: 'wrap', flexDirection: 'row'},
-          ]}
-          showsHorizontalScrollIndicator={false}>
-          {filtredCard.map((card, index) => (
-            <ImageBackground
-              source={{uri: `${url}${card.image.url}`}}
-              resizeMode="cover"
-              style={styles.card}
-              key={index}>
-              <View style={styles.cardContent}>
-                <View style={styles.content}>
-                  <View style={styles.ContentHead}>
-                    <Text style={styles.cardCategerie}>{card.categorie}</Text>
-                    <Text style={styles.cardTitle}>{card.title}</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      card.likes.includes(Current._id)
-                        ? UnlikeProdact(card)
-                        : likeProdact(card)
-                    }>
-                    <Icon
-                      name={
+        <Text
+          style={[
+            styles.subtitle,
+            {
+              fontSize: 36,
+              marginTop: windowHeight * 0.02,
+              marginBottom: windowHeight * 0.03,
+            },
+          ]}>
+          our Products
+        </Text>
+        {filtredCard.length === 0 ? (
+          <Text style={[styles.subtitle, {alignSelf: 'center'}]}>
+            no Products
+          </Text>
+        ) : (
+          <ScrollView
+            contentContainerStyle={[
+              styles.categoryScrollContainer,
+              {flexWrap: 'wrap', flexDirection: 'row'},
+            ]}
+            showsHorizontalScrollIndicator={false}>
+            {filtredCard.map((card, index) => (
+              <ImageBackground
+                source={{uri: `${url}${card.image.url}`}}
+                resizeMode="cover"
+                style={styles.card}
+                key={index}>
+                <View style={styles.cardContent}>
+                  <View style={styles.content}>
+                    <View style={styles.ContentHead}>
+                      <Text style={styles.cardCategerie}>{card.categorie}</Text>
+                      <Text style={styles.cardTitle}>{card.title}</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={{flexDirection: 'row'}}
+                      onPress={() =>
                         card.likes.includes(Current._id)
-                          ? 'heart'
-                          : 'heart-outline'
-                      }
-                      size={30}
-                      color="#F68A72"
-                    />
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.Cardtaile}>
-                  <Text style={styles.cardPrice}>{`${card.price} DT`}</Text>
+                          ? UnlikeProdact(card)
+                          : likeProdact(card)
+                      }>
+                      <Text style={[styles.likedValue, {marginHorizontal: 3}]}>
+                        {card.likes.length}
+                      </Text>
+                      <Icon
+                        name={
+                          card.likes.includes(Current._id)
+                            ? 'heart'
+                            : 'heart-outline'
+                        }
+                        size={30}
+                        color="#F68A72"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.Cardtaile}>
+                    <Text style={styles.cardPrice}>{`${card.price} DT`}</Text>
 
-                  <TouchableOpacity
-                    onPress={() => handleBuy(card)}
-                    style={styles.cardButton}>
-                    <Icon
-                      style={styles.basketIcon}
-                      size={25}
-                      color="#fff"
-                      name="cart-outline"
-                    />
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleBuy(card)}
+                      style={styles.cardButton}>
+                      <Icon
+                        style={styles.basketIcon}
+                        size={25}
+                        color="#fff"
+                        name="cart-outline"
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              </View>
-            </ImageBackground>
-          ))}
-        </ScrollView>
+              </ImageBackground>
+            ))}
+          </ScrollView>
+        )}
       </View>
 
       {/* Basket Modal */}
@@ -471,7 +494,7 @@ const styles = StyleSheet.create({
   cardDescription: {},
   cardButton: {
     marginTop: 5,
-    backgroundColor: '#F68A72',
+    backgroundColor: 'transparent',
     borderRadius: 5,
     flexDirection: 'row',
     elevation: 5,
@@ -479,7 +502,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    width: '30%',
+    width: '20%',
     height: '120%',
     justifyContent: 'center',
     alignItems: 'center',
@@ -556,7 +579,7 @@ const styles = StyleSheet.create({
   },
   basketButton: {
     position: 'absolute',
-    top: 40,
+    top: 70,
     right: 20,
     borderRadius: 50,
     width: 50,
@@ -615,15 +638,16 @@ const styles = StyleSheet.create({
   cartContent: {
     backgroundColor: '#FFFFFF',
     padding: 20,
+    paddingBottom: 90,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    minHeight: '75%',
-    maxHeight: '75%',
+    minHeight: '80%',
+    maxHeight: '80%',
     elevation: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 1,
-      height: -20,
+      height: -1,
     },
     shadowOpacity: 1,
     shadowRadius: 10,
@@ -643,6 +667,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderBottomColor: '#E5E5E5',
     height: windowHeight * 0.15,
+    borderBottomWidth: 2,
+    paddingBottom: 10,
   },
   ImageItem: {
     width: '40%',
@@ -770,14 +796,11 @@ const styles = StyleSheet.create({
   close: {
     position: 'absolute',
     zIndex: 10,
-    marginHorizontal: 20,
-    marginVertical: 20,
+    marginHorizontal: 30,
+    marginVertical: 60,
   },
   arrowIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#fff',
-    resizeMode: 'contain',
+    arrowIcon: {width: 40, resizeMode: 'contain'},
   },
   imageContainer: {
     width: windowWidth,

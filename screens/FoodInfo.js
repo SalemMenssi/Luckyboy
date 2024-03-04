@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,12 +10,23 @@ import {
   Dimensions,
 } from 'react-native';
 import HomeReservation from './Reservation/HomeReservation';
+import RadialGradient from 'react-native-radial-gradient';
 import {url} from '../url';
+import axios from 'axios';
+import jwtDecode from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import LinearGradient from 'react-native-linear-gradient';
 
-const FoodInfo = ({card, close}) => {
+const FoodInfo = ({card, close, getServices}) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
+  const [Current, setCurrent] = useState({});
+  const [likes, setlikes] = useState(card.Likes);
 
+  useEffect(() => {
+    getCurrentUser();
+
+    console.log(card);
+  }, []);
   const openModal = () => {
     setModalVisible(true);
   };
@@ -24,6 +35,42 @@ const FoodInfo = ({card, close}) => {
     setModalVisible(false);
   };
 
+  const getCurrentUser = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const currentId = jwtDecode(token).id;
+
+    try {
+      let currentUser = await axios.get(`${url}/api/user/${currentId}`);
+      setCurrent(currentUser.data.user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const likeService = async service => {
+    try {
+      console.log(service);
+      await axios.put(`${url}/api/services/${service._id}`, {
+        ...service,
+        Likes: [...service.Likes, Current._id],
+      });
+      console.log('sucess');
+      await getServices();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const UnlikeService = async service => {
+    try {
+      await axios.put(`${url}/api/services/${service._id}`, {
+        ...service,
+        Likes: service.Likes.filter(e => e !== Current._id),
+      });
+      await getServices();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.close} onPress={close}>
@@ -35,9 +82,7 @@ const FoodInfo = ({card, close}) => {
 
       <ImageBackground
         style={styles.imageContainer}
-        source={{uri: `${url}${card.image.url}`}}>
-        <Text style={styles.title}>{card.title}</Text>
-      </ImageBackground>
+        source={{uri: `${url}${card.image.url}`}}></ImageBackground>
 
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
@@ -45,31 +90,41 @@ const FoodInfo = ({card, close}) => {
             <View style={styles.LikeContainer}>
               <TouchableOpacity
                 onPress={() => {
-                  setIsLiked(!isLiked);
+                  card.Likes.includes(Current._id)
+                    ? (UnlikeService(card),
+                      console.log(card.Likes.includes(Current._id)),
+                      setlikes(card.Likes.filter(e => e !== Current._id)))
+                    : (likeService(card),
+                      console.log(card.Likes.includes(Current._id)),
+                      setlikes([...card.Likes, Current._id]));
                 }}>
                 <Image
                   style={styles.likeIcon}
                   source={
-                    isLiked
+                    likes.includes(Current._id)
                       ? require('../assets/icons/FullHeart.png')
                       : require('../assets/icons/heart.png')
                   }
                 />
               </TouchableOpacity>
-              <Text style={styles.likedValue}>{card.Likes}</Text>
+              <Text style={styles.likedValue}>{likes.length}</Text>
             </View>
-            <Text style={styles.price}>{card.price}</Text>
+            <Text style={styles.price}>{card.price} DT</Text>
           </View>
+          <Text style={styles.title}>{card.title}</Text>
+
           <Text style={styles.description}>{card.discription}</Text>
         </View>
-
         <TouchableOpacity style={styles.reserveButton} onPress={openModal}>
-          <View
+          <LinearGradient
+            colors={['#0094B4', '#00D9F7']}
+            start={{x: 0, y: 0}}
+            end={{x: 0.9, y: 0.9}}
             style={[styles.RadialEffect, {backgroundColor: '#4698BD'}]}
             // colors={['#5AC2E3', '#4698BD', '#3C84AC']}
           >
             <Text style={styles.buttonText}>Reserve</Text>
-          </View>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
 
@@ -99,14 +154,10 @@ const styles = StyleSheet.create({
   close: {
     position: 'absolute',
     zIndex: 10,
-    marginHorizontal: 20,
-    marginVertical: 20,
+    marginHorizontal: 10,
+    marginVertical: 40,
   },
-  arrowIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#fff',
-  },
+  arrowIcon: {width: 50, resizeMode: 'contain', tintColor: '#000'},
   imageContainer: {
     width: windowWidth,
     height: windowWidth,
@@ -119,7 +170,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 20,
-    height: windowHeight * 0.45,
+    height: windowHeight * 0.5,
     borderTopLeftRadius: 60,
     justifyContent: 'space-between',
     overflow: 'hidden',
@@ -127,12 +178,14 @@ const styles = StyleSheet.create({
   },
   infoRow: {},
   title: {
-    color: '#FFFFFF',
+    color: '#000',
     fontSize: 46,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 5,
+
     fontFamily: 'OriginalSurfer-Regular',
+    paddingTop: 10,
+    paddingBottom: 20,
+    marginTop: windowHeight * 0.05,
+    paddingHorizontal: windowWidth * 0.05,
   },
   LikeAndPriceContainer: {
     flexDirection: 'row',
@@ -140,6 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 30,
+    marginTop: 20,
   },
   LikeContainer: {
     flexDirection: 'row',
@@ -165,7 +219,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: windowHeight * 0.035,
     fontFamily: 'OriginalSurfer-Regular',
-    marginVertical: windowHeight * 0.07,
+    marginBottom: windowHeight * 0.06,
     paddingHorizontal: windowWidth * 0.05,
   },
   buttonContainer: {
@@ -175,9 +229,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   reserveButton: {
-    borderRadius: 60,
-    width: '80%',
-    height: windowHeight * 0.09,
+    borderRadius: 15,
+    width: '50%',
+    height: windowHeight * 0.06,
     alignSelf: 'center',
     elevation: 5,
     overflow: 'hidden',
@@ -189,7 +243,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   buttonText: {
-    fontSize: 42,
+    fontSize: 30,
     color: '#fff',
     fontFamily: 'OriginalSurfer-Regular',
   },

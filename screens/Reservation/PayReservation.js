@@ -103,13 +103,13 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
-  arrowIcon: {},
+  arrowIcon: {width: 40, resizeMode: 'contain', tintColor: '#fff'},
   heading: {
     alignSelf: 'center',
     fontSize: 36,
     fontFamily: 'OriginalSurfer-Regular',
     color: '#FFD466',
-    marginVertical: windowHeight * 0.1,
+    marginTop: windowHeight * 0.24,
   },
   sub: {
     alignSelf: 'center',
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 10,
   },
-  return: {padding: 10, position: 'absolute', marginTop: 10, marginLeft: 10},
+  return: {padding: 10, position: 'absolute', marginTop: 30, marginLeft: 0},
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

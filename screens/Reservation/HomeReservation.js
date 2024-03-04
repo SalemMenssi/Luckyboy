@@ -12,22 +12,23 @@ import {
 import {Calendar} from 'react-native-calendars';
 import DatePicker from 'react-native-date-picker';
 import {useNavigation} from '@react-navigation/native';
-
+import RadialGradient from 'react-native-radial-gradient';
 import axios from 'axios';
 import {url} from '../../url';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
+import LinearGradient from 'react-native-linear-gradient';
 
 const DatePickerCostum = props => {
   const [date, setDate] = useState(new Date());
 
   return (
     <DatePicker
-      textColor="#fff"
+      textColor="#000"
       mode="time"
       date={props.selectedTime}
       onDateChange={props.setSelectedTime}
-      style={{backgroundColor: '#3C84AC', borderRadius: 10, padding: 10}} // Add your custom styles here
+      style={{backgroundColor: '#fff', borderRadius: 10, padding: 10}} // Add your custom styles here
     />
   );
 };
@@ -38,9 +39,12 @@ const HomeReservation = ({card, close}) => {
   const [numberOfPeople, setNumberOfPeople] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
   const [Current, setCurrent] = useState({});
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     getCurrentUser();
+    getAllUsers();
+    console.log('users:', users);
   }, []);
 
   const getCurrentUser = async () => {
@@ -54,7 +58,23 @@ const HomeReservation = ({card, close}) => {
       console.log(error);
     }
   };
+  const getAllUsers = async () => {
+    try {
+      let resualt = await axios.get(`${url}/api/user/`);
+      console.log(resualt.data.userList);
+      setUsers(resualt.data.userList);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  const sendNotification = async (deviceToken, title, body) => {
+    try {
+      await axios.post(`${url}/send-notification`, {deviceToken, title, body});
+    } catch (error) {
+      console.log('notif', error);
+    }
+  };
   const addBooking = async () => {
     try {
       let NewBooking = {
@@ -64,6 +84,16 @@ const HomeReservation = ({card, close}) => {
         time: selectedTime.toLocaleTimeString(),
         date: selectedDate,
       };
+      const admins = users.filter(e => e.isAdmin == true);
+      admins.map(e => {
+        console.log(e);
+        const deviceToken = e.fcmtoken[e.fcmtoken.length - 1];
+        sendNotification(
+          deviceToken,
+          'New Reservation',
+          `You Recived a New Reservation`,
+        );
+      });
       await axios.post(`${url}/api/booking`, NewBooking);
       console.log(NewBooking);
     } catch (error) {
@@ -100,14 +130,14 @@ const HomeReservation = ({card, close}) => {
 
   const Sabmit = () => {
     addBooking();
-
+    close();
     navigation.navigate('Reserve');
   };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.returnBtn}>
+        <TouchableOpacity onPress={close} style={styles.returnBtn}>
           <Image
             style={styles.arrowIcon}
             source={require('../../assets/icons/fleche.png')}
@@ -117,8 +147,11 @@ const HomeReservation = ({card, close}) => {
         <Text style={styles.title}>Reservation</Text>
         <Text style={styles.subtitle}>Select a date</Text>
         <View style={styles.calendarBox}>
-          <View
-            style={[styles.gradient, {backgroundColor: '#3C84AC'}]}
+          <LinearGradient
+            colors={['#0094B4', '#00D9F7']}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+            style={[styles.gradient]}
             // colors={['#3C84AC', '#5AC2E3', '#3C84AC']}
           >
             <Calendar
@@ -133,6 +166,7 @@ const HomeReservation = ({card, close}) => {
                 todayTextColor: '#fff',
                 textDisabledColor: 'rgba(255, 255, 255, 0.28)',
                 dayTextColor: '#fff',
+                textDayFontWeight: '500',
                 textSectionTitleColor: '#fff',
                 textMonthFontWeight: 'bold',
                 textMonthFontSize: 20,
@@ -141,7 +175,7 @@ const HomeReservation = ({card, close}) => {
               }}
               markedDates={markedDates}
             />
-          </View>
+          </LinearGradient>
         </View>
 
         <Text style={styles.subtitle}>Select Time</Text>
@@ -167,27 +201,42 @@ const HomeReservation = ({card, close}) => {
             onPress={decrementNumberOfPeople}
             style={[
               styles.button,
-              {borderTopLeftRadius: 10, borderBottomLeftRadius: 10},
+              {
+                borderRadius: 50,
+                borderWidth: 2,
+                borderColor: '#5ac2e3',
+                backgroundColor: '#fff',
+                color: '#5ac2e3',
+              },
             ]}>
-            <Text style={styles.buttonText}>-</Text>
+            <Text style={[styles.buttonText, {color: '#5ac2e3'}]}>-</Text>
           </TouchableOpacity>
           <Text style={styles.numberOfPeople}>{numberOfPeople}</Text>
           <TouchableOpacity
             onPress={incrementNumberOfPeople}
             style={[
               styles.button,
-              {borderTopRightRadius: 10, borderBottomRightRadius: 10},
+              {
+                borderRadius: 50,
+                borderWidth: 2,
+                borderColor: '#5ac2e3',
+                backgroundColor: '#fff',
+                color: '#5ac2e3',
+              },
             ]}>
-            <Text style={styles.buttonText}>+</Text>
+            <Text style={[styles.buttonText, {color: '#5ac2e3'}]}>+</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.reserveButton} onPress={Sabmit}>
-          <View
-            style={[styles.RadialEffect,{backgroundColor:"#5AC2E3"}]}
+          <LinearGradient
+            colors={['#0094B4', '#00D9F7']}
+            start={{x: 0, y: 0}}
+            end={{x: 0.9, y: 0.9}}
+            style={[styles.RadialEffect, {backgroundColor: '#5ac2e3'}]}
             //colors={['#5AC2E3', '#4698BD', '#3C84AC']}
-            >
+          >
             <Text style={styles.buttonText}>Reserve</Text>
-          </View>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -205,11 +254,14 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#fff',
     alignItems: 'center',
+    paddingTop: 80,
   },
   returnBtn: {position: 'absolute', left: 0},
   arrowIcon: {
-    top: 30,
-    left: 20,
+    marginTop: 80,
+    margin: 30,
+    width: 40,
+    resizeMode: 'contain',
   },
   title: {
     marginTop: 17,
@@ -219,11 +271,9 @@ const styles = StyleSheet.create({
     color: '#0A0A0A',
   },
   subtitle: {
-    color: '#FFD466',
+    color: '#0094B4',
     fontSize: 24,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 1.2,
+
     fontFamily: 'OriginalSurfer-Regular',
     marginVertical: windowHeight * 0.03,
   },
@@ -246,7 +296,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   reserveButton: {
-    borderRadius: 60,
+    borderRadius: 15,
     width: '40%',
     height: windowHeight * 0.06,
     alignSelf: 'center',
@@ -272,8 +322,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
 
     backgroundColor: '#3C85AD',
     justifyContent: 'center',
@@ -283,6 +333,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    top: -1,
   },
   numberOfPeople: {
     fontSize: 24,
@@ -292,7 +343,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   calendarBox: {
-    height: windowHeight * 0.5,
+    height: windowHeight * 0.37,
     width: windowWidth * 0.8,
     borderRadius: 20,
     overflow: 'hidden',

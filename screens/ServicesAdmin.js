@@ -275,6 +275,7 @@ const ServicesAdmin = () => {
       price: Number(newServicePrice),
     });
     setModalEditService(false);
+    setModalInfoVisible(true);
   };
   const handleUpdateImage = async id => {
     try {
@@ -284,14 +285,14 @@ const ServicesAdmin = () => {
         cropping: true,
       });
 
-      let newImageToUpdate = await uploadImageToUpdate(image);
+      let newImage = await uploadImageToUpdate(image);
       setSelectedService({
         ...selectedService,
-        image: newImageToUpdate,
+        image: newImage,
       });
       await axios.put(`${url}/api/services/${id}`, {
         ...selectedService,
-        image: newImageToUpdate,
+        image: newImage,
       });
       setNewServiceImage({});
       await getServices();
@@ -301,15 +302,9 @@ const ServicesAdmin = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text
-        style={[
-          styles.heading,
-          {marginTop: `${Platform.OS === 'ios' && '15%'}`},
-        ]}>
-        Activities
-      </Text>
-      <View style={{marginBottom: windowHeight * 0.2}}>
+    <View style={styles.container}>
+      <Text style={styles.heading}>Activities</Text>
+      <ScrollView style={{maxHeight: windowHeight * 0.75}}>
         {Services &&
           Services.map(post => (
             <View key={post._id} style={styles.postCard}>
@@ -321,8 +316,8 @@ const ServicesAdmin = () => {
                 </View>
 
                 <Text style={[styles.cardDescription, {padding: 20}]}>
-                  {post.discription.length > 20
-                    ? post.discription.slice(0, 19).concat('...')
+                  {post.discription.length > 30
+                    ? post.discription.slice(0, 29).concat('...')
                     : post.discription}
                 </Text>
                 <TouchableOpacity
@@ -342,7 +337,7 @@ const ServicesAdmin = () => {
               />
             </View>
           ))}
-      </View>
+      </ScrollView>
       <TouchableOpacity
         style={styles.addPost}
         onPress={() => setModalVisible(true)}>
@@ -350,11 +345,11 @@ const ServicesAdmin = () => {
           // colors={['#3C84AC', '#5AC2E3', '#3C84AC']}
 
           style={{
-            width: '100%',
+            /*width: '100%',
             height: '100%',
-            alignItems: 'center',
+            alignItems: 'center',*/
             justifyContent: 'center',
-            backgroundColor: '#3C84AC',
+            backgroundColor: '#5AC2E3',
           }}>
           <Text style={styles.addPostText}>+</Text>
         </View>
@@ -438,17 +433,11 @@ const ServicesAdmin = () => {
         animationType="slide"
         onRequestClose={() => setModalInfoVisible(false)}>
         <ScrollView style={styles.modalContainer}>
-          <Text
-            style={[
-              styles.modalTitle,
-              {marginTop: `${Platform.OS === 'ios' && '15%'}`},
-            ]}>
-            {selectedService.title}
-          </Text>
+          <Text style={styles.modalTitle}>{selectedService.title}</Text>
 
           <View style={styles.ServiceHeader}>
             <View style={styles.informationService}>
-              <Text style={styles.price}>{selectedService.price}</Text>
+              <Text style={styles.price}>{selectedService.price} DT</Text>
 
               <Text style={styles.cardDescription}>
                 {selectedService.discription}
@@ -458,6 +447,7 @@ const ServicesAdmin = () => {
               <TouchableOpacity
                 onPress={() => {
                   setModalEditService(true);
+                  setModalInfoVisible(false);
                   setNewServicePrice(selectedService.price);
                   setNewServiceDescription(selectedService.discription);
                   setNewServiceTitle(selectedService.title);
@@ -467,7 +457,11 @@ const ServicesAdmin = () => {
                   source={require('../assets/icons/edit.png')}
                 />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setModalDeleteService(true)}>
+              <TouchableOpacity
+                onPress={() => {
+                  setModalInfoVisible(false);
+                  setModalDeleteService(true);
+                }}>
                 <Image
                   style={{width: 25, height: 40, resizeMode: 'contain'}}
                   source={require('../assets/icons/deleteIcon.png')}
@@ -485,7 +479,7 @@ const ServicesAdmin = () => {
           <Image
             source={{uri: `${url}${selectedService.image.url}`}}
             style={[
-              styles.cardImageEdit,
+              styles.cardImage,
               {
                 borderRadius: 20,
                 width: '100%',
@@ -523,14 +517,21 @@ const ServicesAdmin = () => {
             </Text>
             <View style={styles.buttonContainer}>
               <TouchableOpacity
-                style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setModalDeleteService(false)}>
-                <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
+                style={[
+                  styles.exitModalButton,
+                  styles.cancelButton,
+                  {borderColor: '#F68A72'},
+                ]}
+                onPress={() => {
+                  setModalDeleteService(false);
+                  setModalInfoVisible(true);
+                }}>
+                <Text style={[styles.buttonText, {color: '#F68A72'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handelDeleteService(selectedService._id)}
-                style={styles.exitModalButton}>
-                <Text style={[styles.buttonText, {color: '#F68A72'}]}>Yes</Text>
+                style={[styles.exitModalButton, {borderColor: '#0080B2'}]}>
+                <Text style={[styles.buttonText, {color: '#0080B2'}]}>Yes</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -547,10 +548,6 @@ const ServicesAdmin = () => {
               styles.AlertmodalContent,
               {height: windowHeight * 0.6, justifyContent: 'space-evenly'},
             ]}>
-            <Image
-              source={require('../assets/icons/edit.png')} // Replace with your image source
-              style={styles.AlertmodalImage}
-            />
             <Text style={styles.AlertmodalTitle}>Edit</Text>
             <TextInput
               style={styles.inputModal}
@@ -573,7 +570,10 @@ const ServicesAdmin = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setModalEditService(false)}>
+                onPress={() => {
+                  setModalEditService(false);
+                  setModalInfoVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -585,7 +585,7 @@ const ServicesAdmin = () => {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 const windowWidth = Dimensions.get('window').width;
@@ -596,7 +596,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingVertical: 20,
-    height: windowHeight * 0.8,
   },
   heading: {
     color: '#383E44',
@@ -604,10 +603,12 @@ const styles = StyleSheet.create({
     fontSize: 46,
     alignSelf: 'center',
     marginHorizontal: 20,
+    marginTop: windowHeight * 0.07,
+    marginBottom: 20,
   },
   postCard: {
     alignSelf: 'center',
-    height: windowHeight * 0.5,
+    height: windowHeight * 0.37,
     width: windowWidth * 0.8,
     borderRadius: 20,
     marginVertical: 20,
@@ -624,16 +625,11 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     width: '100%',
-    height: '70%',
+    height: '60%',
     borderBottomEndRadius: 20,
     borderBottomStartRadius: 20,
-    overflow: 'hidden', // Apply overflow to the cardImage
-    position: 'absolute',
-
-    bottom: 0,
   },
-  cardImageEdit: {width: '100%', height: '100%'},
-  Content: {},
+  Content: {height: '40%', justifyContent: 'space-between'},
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -643,16 +639,17 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: '#383E44',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Regular',
+
     fontSize: 30,
   },
   cardDescription: {
     fontSize: 16,
     color: '#333',
-    paddingVertical: 20,
+    paddingVertical: 10,
     lineHeight: 24,
   },
-  seeMoreButton: {position: 'absolute', right: 10, bottom: 8},
+  seeMoreButton: {position: 'absolute', right: 10, bottom: 13},
   seeMoreButtonText: {
     color: '#3C84AC',
     fontFamily: 'OriginalSurfer-Regular',
@@ -691,6 +688,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     alignSelf: 'center',
     marginBottom: windowHeight * 0.05,
+    marginTop: windowHeight * 0.07,
   },
   label: {
     fontFamily: 'Poppins-Medium',
@@ -722,18 +720,20 @@ const styles = StyleSheet.create({
     height: windowWidth * 0.17,
     borderRadius: 50,
     overflow: 'hidden',
-    position: 'relative',
+    position: 'absolute',
     elevation: 10,
-    bottom: windowHeight * 0.2,
+    bottom: 90,
     alignSelf: 'center',
   },
   addPostText: {
     color: '#fff',
     height: '100%',
     fontSize: 46,
+    textAlign: 'center',
+    paddingTop: 5,
   },
   close: {position: 'absolute', top: windowHeight * 0.05, left: 20},
-  arrowIcon: {width: 20, height: 20},
+  arrowIcon: {width: 40, resizeMode: 'contain'},
   aploadContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -803,6 +803,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   AlertmodalContent: {
     elevation: 10,
@@ -814,7 +815,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     alignItems: 'center',
-    height: windowHeight * 0.4,
+    height: windowHeight * 0.34,
     width: windowWidth * 0.75,
   },
   AlertmodalImage: {
@@ -850,23 +851,24 @@ const styles = StyleSheet.create({
     shadowColor: 'rgba(56, 62, 68, 1)',
     shadowOffset: {width: 1, height: 1},
     shadowOpacity: 1,
-    shadowRadius: 5,
+    shadowRadius: 3,
     marginVertical: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
   },
   exitModalButton: {
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
     marginHorizontal: 10,
+    borderWidth: 2,
   },
   Row: {flexDirection: 'row', alignItems: 'center'},
   uploadButtonUpdate: {
     alignSelf: 'flex-end',
     position: 'absolute',
-    top: windowHeight * 0.39,
+    top: windowHeight * 0.33,
     zIndex: 100,
   },
   uploadButton: {},

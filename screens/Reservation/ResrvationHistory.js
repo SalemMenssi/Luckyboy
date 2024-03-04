@@ -15,27 +15,31 @@ import {
   Animated,
   Dimensions,
   FlatList,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {url} from '../../url';
 import FoodInfo from '../FoodInfo';
 // import RadialGradient from 'react-native-radial-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-// import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import Icon1 from 'react-native-vector-icons/Ionicons';
 import EventInfo from '../EventInfo';
+import messaging from '@react-native-firebase/messaging';
+
 Icon.loadFont();
-Icon1.loadFont();
 const ReservationHistory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [eventModalVisible, setEventModalVisible] = useState(false);
+  const [notifModalVisible, setNotifModalVisible] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [Current, setCurrent] = useState({});
+  const [Current, setCurrent] = useState({fcmtoken: []});
   const [Services, setServices] = useState([]);
   const [Events, setEvents] = useState([]);
-  const [notificationCount, setNotificationCount] = useState(3);
+  const [showNotif, setShowNotif] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   const fadeAnim = useState(new Animated.Value(0))[0];
 
@@ -47,11 +51,52 @@ const ReservationHistory = () => {
     }).start();
   }, []);
 
+  const getToken = async user => {
+    try {
+      const fcmtoken = await messaging().getToken();
+      let isSaved = user && user.fcmtoken.includes(fcmtoken);
+      //console.log(fcmtoken);
+      if (!isSaved) {
+        await updateUserFCMToken(fcmtoken);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  };
+  const retrieveNotificationData = async () => {
+    try {
+      const notificationData = await AsyncStorage.getItem('notifs');
+      if (notificationData !== null) {
+        setNotifications(JSON.parse(notificationData));
+        // Process the notification data as needed
+      } else {
+        setNotifications([]);
+      }
+    } catch (error) {
+      console.error(
+        'Error retrieving notification data from AsyncStorage:',
+        error,
+      );
+    }
+  };
+
   useEffect(() => {
-    getCurrentUser();
     getServices();
     getEvents();
-  }, [Current]);
+    requestUserPermission();
+    retrieveNotificationData();
+    getCurrentUser();
+  }, []);
+  useEffect(() => {
+    retrieveNotificationData();
+    getCurrentUser();
+  }, [notifications]);
 
   const getCurrentUser = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -60,11 +105,23 @@ const ReservationHistory = () => {
     try {
       let currentUser = await axios.get(`${url}/api/user/${currentId}`);
       setCurrent(currentUser.data.user);
+      await getToken(currentUser.data.user);
     } catch (error) {
-      console.log(error);
+      console.log('curr', error);
     }
   };
+  const updateUserFCMToken = async token => {
+    try {
+      await axios.put(`${url}/api/user/${Current._id}`, {
+        ...Current,
+        fcmtoken: [...Current.fcmtoken, token],
+      });
 
+      await getCurrentUser();
+    } catch (error) {
+      console.log('update', error);
+    }
+  };
   const getServices = async () => {
     try {
       let servicesData = await axios.get(`${url}/api/services/`);
@@ -104,6 +161,28 @@ const ReservationHistory = () => {
       console.log(error);
     }
   };
+  const likeService = async service => {
+    try {
+      await axios.put(`${url}/api/services/${service._id}`, {
+        ...service,
+        Likes: service.likes++,
+      });
+      getServices();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const UnlikeService = async service => {
+    try {
+      await axios.put(`${url}/api/services/${service._id}`, {
+        ...service,
+        Likes: service.likes--,
+      });
+      getServices();
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const handleSearch = text => {
     setSearchText(text);
   };
@@ -129,16 +208,26 @@ const ReservationHistory = () => {
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.notificationContainer}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      scrollEnabled={!showNotif}>
+      <LinearGradient
+        colors={['#0094B4', '#00D9F7']}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+        style={styles.header}>
+        <TouchableOpacity
+          style={styles.notificationContainer}
+          onPress={() => setShowNotif(true)}>
           <Icon name="bell" size={20} color="#000" />
-          {notificationCount > 0 && (
+          {notifications.length > 0 && (
             <View style={styles.notificationBadge}>
-              <Text style={styles.notificationText}>{notificationCount}</Text>
+              <Text style={styles.notificationText}>
+                {notifications.length}
+              </Text>
             </View>
           )}
-        </View>
+        </TouchableOpacity>
         <View style={styles.profileContent}>
           <Image
             source={{uri: `${url}${Current.avatar && Current.avatar.url}`}}
@@ -147,7 +236,7 @@ const ReservationHistory = () => {
           <Text style={styles.HeaderText}>{`HI, ${Current.username}`}</Text>
         </View>
         <Text style={styles.welcome}>Would you like to enjoy your day ?</Text>
-      </View>
+      </LinearGradient>
       <View style={styles.searchBar}>
         <Icon
           name="search"
@@ -189,7 +278,20 @@ const ReservationHistory = () => {
                   source={{uri: `${url}${item.image.url}`}}
                   style={styles.ServicesCardBackground}
                   resizeMode="cover">
-                  <Text style={styles.ServicesTitle}>{item.title}</Text>
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.ServicesTitle}>{item.title}</Text>
+                    <View style={styles.booking}>
+                      <Text style={styles.bookingText}>Book Now</Text>
+                      <Image
+                        style={[
+                          styles.seemoreService,
+                          {transform: [{scaleX: -1}]},
+                        ]}
+                        source={require('../../assets/icons/fleche.png')}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  </View>
                 </ImageBackground>
               </TouchableOpacity>
             )}
@@ -209,31 +311,22 @@ const ReservationHistory = () => {
                   style={styles.recommendationImage}
                 />
                 <View style={styles.recommendationInfo}>
-                  <Text style={styles.recommendationTitle}>{item.title}</Text>
+                  <View>
+                    <Text style={styles.recommendationTitle}>{item.title}</Text>
+                    <Text style={styles.bookingText}>
+                      {item.date.slice(0, 10)}
+                    </Text>
+                  </View>
                   <TouchableOpacity
-                    style={styles.ratingContainer}
-                    onPress={() =>
-                      item.likes.includes(Current._id)
-                        ? UnlikeEvent(item)
-                        : likeEvent(item)
-                    }>
-                    <Icon1
-                      name={
-                        item.likes.includes(Current._id)
-                          ? 'heart'
-                          : 'heart-outline'
-                      }
-                      size={30}
-                      color="#F68A72"
+                    onPress={() => handleSeeMoreEvent(item)}
+                    style={styles.consultIconContainer}>
+                    <Image
+                      style={styles.arrowIcon}
+                      source={require('../../assets/icons/seemore.png')}
+                      resizeMode="contain"
                     />
-                    <Text style={styles.ratingText}>{item.likes.length}</Text>
                   </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleSeeMoreEvent(item)}
-                  style={styles.consultIconContainer}>
-                  <Icon name="arrow-right" size={20} color="#000" />
-                </TouchableOpacity>
               </View>
             )}
             horizontal
@@ -273,7 +366,11 @@ const ReservationHistory = () => {
         onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <FoodInfo card={selectedCard} close={closeModal} />
+            <FoodInfo
+              card={selectedCard}
+              close={closeModal}
+              getServices={getServices}
+            />
           </View>
         </View>
       </Modal>
@@ -292,6 +389,28 @@ const ReservationHistory = () => {
           </View>
         </View>
       </Modal>
+      {showNotif ? (
+        <View style={styles.notifbox}>
+          <View style={styles.notifHeader}>
+            <Text style={styles.notifHeaderTitle}>Notifications</Text>
+            <TouchableOpacity
+              style={styles.close}
+              onPress={() => {
+                setShowNotif(false);
+              }}>
+              <Icon name="close" size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView>
+            {notifications.map((item, index) => (
+              <View key={index} style={styles.notifitem}>
+                <Text style={styles.notiftitle}>{item.title}</Text>
+                <Text style={styles.notifbody}>{item.body}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      ) : null}
     </ScrollView>
   );
 };
@@ -320,6 +439,14 @@ const styles = StyleSheet.create({
     elevation: 5,
     zIndex: 15,
     top: windowHeight * -0.1,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
   searchIcon: {
     marginRight: 10,
@@ -336,10 +463,20 @@ const styles = StyleSheet.create({
     color: '#383E44',
     fontSize: 20,
   },
+  seemoreService: {
+    resizeMode: 'contain',
+    width: 30,
+    padding: 5,
+    marginLeft: 5,
+    height: 30,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#3C84AC',
+  },
   arrowIcon: {
-    position: 'absolute',
-    left: 15,
-    top: 19,
+    resizeMode: 'contain',
+    width: 40,
+    height: 40,
   },
   title: {
     width: '100%',
@@ -392,15 +529,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
+  titleContainer: {
+    position: 'relative',
+    height: windowHeight * 0.1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    paddingBottom: 50,
+    paddingHorizontal: 10,
+  },
+  booking: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  bookingText: {fontSize: 20, color: '#3C84AC'},
   ServicesTitle: {
-    color: '#FFFFFF',
-    fontSize: 40,
+    color: '#000',
+    fontSize: 36,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: {width: -1, height: 1},
     elevation: 5,
     textShadowRadius: 5,
-    marginBottom: 15,
+
     fontFamily: 'Poppins-Regular',
+    alignSelf: 'flex-start',
   },
   modalContainer: {},
   modalContent: {},
@@ -410,7 +564,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignSelf: 'flex-start',
     marginLeft: 20,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Regular',
     color: '#383E44',
     textShadowColor: 'rgba(56, 62, 68, 0.50)',
     textShadowOffset: {width: 1, height: 1},
@@ -422,13 +576,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 20,
     elevation: 8,
-    shadowColor: '#000',
+    shadowColor: '#666',
     shadowOffset: {
       width: 0,
       height: 5,
     },
     shadowOpacity: 1,
-    shadowRadius: 40,
+    shadowRadius: 2,
     marginHorizontal: 20,
     backgroundColor: '#fff',
   },
@@ -457,7 +611,16 @@ const styles = StyleSheet.create({
   },
   recommendationContainer: {
     marginTop: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 50,
+    elevation: 8,
+    shadowColor: '#666',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 5,
   },
   recommendationCard: {
     width: 250,
@@ -465,6 +628,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 10,
+    backgroundColor: '#fff',
     overflow: 'hidden',
   },
   recommendationImage: {
@@ -473,14 +637,18 @@ const styles = StyleSheet.create({
   },
   recommendationInfo: {
     padding: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   recommendationTitle: {
     fontSize: 23,
     fontFamily: 'Poppins-Regular',
-    color: '#3C84AC',
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 1,
+    color: '#383E44',
+
+    // textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    // textShadowOffset: {width: 1, height: 1},
+    // textShadowRadius: 1,
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -494,11 +662,8 @@ const styles = StyleSheet.create({
     fontFamily: 'OriginalSurfer-Regular',
   },
   consultIconContainer: {
-    position: 'absolute',
-    bottom: 15,
-    right: 10,
-    backgroundColor: '#fff',
-    padding: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 9,
     borderRadius: 50,
   },
   QuoteImage: {
@@ -529,21 +694,22 @@ const styles = StyleSheet.create({
   head: {alignSelf: 'center'},
   MediaIcon: {width: 60, height: 60},
   socialMedia: {
-    width: '80%',
+    width: '65%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignSelf: 'center',
-    marginTop: windowHeight * 0.1,
+    marginTop: windowHeight * 0.05,
   },
   notificationContainer: {
     position: 'absolute',
     top: windowHeight * 0.05,
     right: 40,
+    padding: 5,
   },
   notificationBadge: {
     position: 'absolute',
     top: -10,
-    right: -10,
+    right: -5,
     backgroundColor: 'red',
     borderRadius: 10,
     width: 20,
@@ -560,7 +726,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   welcome: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Regular',
     fontSize: 20,
     color: '#fff',
     marginVertical: 10,
@@ -569,5 +735,65 @@ const styles = StyleSheet.create({
     fontFamily: 'OriginalSurfer-Regular',
     fontSize: 42,
     marginTop: windowHeight * 0.06,
+  },
+  alertText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'red', // Change color as needed
+  },
+  notifbox: {
+    position: 'absolute',
+    paddingBottom: 20,
+    width: windowWidth * 0.7,
+    backgroundColor: '#fff',
+    zIndex: 10000,
+    borderRadius: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    top: windowHeight * 0.25,
+    maxHeight: windowHeight * 0.55,
+    minHeight: windowHeight * 0.55,
+  },
+  notifitem: {
+    marginBottom: 10,
+    borderBottomColor: '#ddd',
+    borderBottomWidth: 1,
+    borderTopColor: '#ddd',
+    borderTopWidth: 1,
+    paddingHorizontal: 10,
+  },
+  notifHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    paddingVertical: 15,
+  },
+
+  notifHeaderTitle: {
+    fontSize: 23,
+    fontFamily: 'Poppins-Regular',
+    color: '#000',
+  },
+  notiftitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  notifbody: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+  },
+  close: {
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderWidth: 1,
   },
 });
