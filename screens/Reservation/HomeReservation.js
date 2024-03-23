@@ -33,7 +33,7 @@ const DatePickerCostum = props => {
   );
 };
 
-const HomeReservation = ({card, close}) => {
+const HomeReservation = ({card, close, closeParent}) => {
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState(1);
@@ -148,7 +148,7 @@ const HomeReservation = ({card, close}) => {
         <Text style={styles.subtitle}>Select a date</Text>
         <View style={styles.calendarBox}>
           <LinearGradient
-            colors={['#0094B4', '#00D9F7']}
+            colors={['#0094B4', '#00Daf8']}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             style={[styles.gradient]}
@@ -229,7 +229,7 @@ const HomeReservation = ({card, close}) => {
         </View>
         <TouchableOpacity style={styles.reserveButton} onPress={Sabmit}>
           <LinearGradient
-            colors={['#0094B4', '#00D9F7']}
+            colors={['#0094B4', '#00DaF8']}
             start={{x: 0, y: 0}}
             end={{x: 0.9, y: 0.9}}
             style={[styles.RadialEffect, {backgroundColor: '#5ac2e3'}]}
@@ -254,27 +254,28 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#fff',
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 50,
   },
   returnBtn: {position: 'absolute', left: 0},
   arrowIcon: {
-    marginTop: 80,
-    margin: 30,
+    marginTop: 50,
+    marginLeft: 15,
     width: 40,
     resizeMode: 'contain',
+    tintColor: '#383e44',
   },
   title: {
-    marginTop: 17,
+    marginTop: windowHeight * 0.045,
     textAlign: 'center',
     fontSize: 36,
     fontWeight: '500',
-    color: '#0A0A0A',
+    color: '#383e44',
   },
   subtitle: {
-    color: '#0094B4',
+    color: '#5ac2e3',
     fontSize: 24,
 
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     marginVertical: windowHeight * 0.03,
   },
   calendar: {

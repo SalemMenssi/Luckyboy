@@ -281,13 +281,12 @@ const ReservationHistory = () => {
                   <View style={styles.titleContainer}>
                     <Text style={styles.ServicesTitle}>{item.title}</Text>
                     <View style={styles.booking}>
-                      <Text style={styles.bookingText}>Book Now</Text>
+                      <Text style={[styles.bookingText, {marginRight: 5}]}>
+                        Book Now
+                      </Text>
                       <Image
-                        style={[
-                          styles.seemoreService,
-                          {transform: [{scaleX: -1}]},
-                        ]}
-                        source={require('../../assets/icons/fleche.png')}
+                        style={[styles.seemoreService]}
+                        source={require('../../assets/icons/seemore.png')}
                         resizeMode="contain"
                       />
                     </View>
@@ -299,7 +298,7 @@ const ReservationHistory = () => {
             showsHorizontalScrollIndicator={false}
           />
         </Animated.View>
-        <Text style={styles.SubTitle}>Join our events</Text>
+        <Text style={[styles.SubTitle, {marginTop: 40}]}>Join our events</Text>
         <View style={styles.recommendationContainer}>
           <FlatList
             data={Events}
@@ -311,8 +310,12 @@ const ReservationHistory = () => {
                   style={styles.recommendationImage}
                 />
                 <View style={styles.recommendationInfo}>
-                  <View>
-                    <Text style={styles.recommendationTitle}>{item.title}</Text>
+                  <View
+                    style={{justifyContent: 'space-between', height: '100%'}}>
+                    <Text
+                      style={[styles.ServicesTitle, {top: -10, fontSize: 32}]}>
+                      {item.title}
+                    </Text>
                     <Text style={styles.bookingText}>
                       {item.date.slice(0, 10)}
                     </Text>
@@ -321,7 +324,10 @@ const ReservationHistory = () => {
                     onPress={() => handleSeeMoreEvent(item)}
                     style={styles.consultIconContainer}>
                     <Image
-                      style={styles.arrowIcon}
+                      style={[
+                        styles.seemoreService,
+                        {marginTop: 43, marginRight: -10},
+                      ]}
                       source={require('../../assets/icons/seemore.png')}
                       resizeMode="contain"
                     />
@@ -334,14 +340,21 @@ const ReservationHistory = () => {
           />
         </View>
 
-        <Text style={[styles.SubTitle, {alignSelf: 'center'}]}>
-          Follow us !
-        </Text>
-
         <Image
           style={styles.head}
           source={require('../../assets/icons/anim.png')}
         />
+        <Text
+          style={[
+            {
+              alignSelf: 'center',
+              color: '#00daf8',
+              fontFamily: 'OriginalSurfer-Regular',
+              fontSize: 50,
+            },
+          ]}>
+          Follow us !
+        </Text>
         <View style={styles.socialMedia}>
           <Image
             source={require('../../assets/icons/facebook.png')}
@@ -470,7 +483,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     height: 30,
     borderRadius: 50,
-    borderWidth: 2,
+
     borderColor: '#3C84AC',
   },
   arrowIcon: {
@@ -543,15 +556,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-end',
+    marginTop: 10,
   },
-  bookingText: {fontSize: 20, color: '#3C84AC'},
+  bookingText: {fontSize: 20, color: '#0094b4'},
   ServicesTitle: {
     color: '#000',
     fontSize: 36,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: -1, height: 1},
-    elevation: 5,
-    textShadowRadius: 5,
 
     fontFamily: 'Poppins-Regular',
     alignSelf: 'flex-start',
@@ -576,13 +586,13 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 20,
     elevation: 8,
-    shadowColor: '#666',
+    shadowColor: '#383e44',
     shadowOffset: {
       width: 0,
-      height: 5,
+      height: 0,
     },
-    shadowOpacity: 1,
-    shadowRadius: 2,
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
     marginHorizontal: 20,
     backgroundColor: '#fff',
   },
@@ -610,36 +620,38 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   recommendationContainer: {
-    marginTop: 20,
+    marginTop: 0,
     paddingHorizontal: 20,
-    paddingVertical: 50,
+    paddingVertical: 40,
     elevation: 8,
-    shadowColor: '#666',
+    shadowColor: '#383e44',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 0,
     },
-    shadowOpacity: 1,
+    shadowOpacity: 0.5,
     shadowRadius: 5,
   },
   recommendationCard: {
-    width: 250,
+    width: windowWidth * 0.7,
+    height: windowWidth * 0.7,
     marginRight: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 10,
+    borderRadius: 20,
     backgroundColor: '#fff',
     overflow: 'hidden',
   },
   recommendationImage: {
     width: '100%',
-    height: 150,
+    height: '70%',
   },
   recommendationInfo: {
     padding: 10,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    height: '30%',
   },
   recommendationTitle: {
     fontSize: 23,

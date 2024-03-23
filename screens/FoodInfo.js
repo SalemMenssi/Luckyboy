@@ -32,6 +32,7 @@ const FoodInfo = ({card, close, getServices}) => {
   };
 
   const closeModal = () => {
+    close();
     setModalVisible(false);
   };
 
@@ -109,7 +110,6 @@ const FoodInfo = ({card, close, getServices}) => {
               </TouchableOpacity>
               <Text style={styles.likedValue}>{likes.length}</Text>
             </View>
-            <Text style={styles.price}>{card.price} DT</Text>
           </View>
           <Text style={styles.title}>{card.title}</Text>
 
@@ -117,12 +117,16 @@ const FoodInfo = ({card, close, getServices}) => {
         </View>
         <TouchableOpacity style={styles.reserveButton} onPress={openModal}>
           <LinearGradient
-            colors={['#0094B4', '#00D9F7']}
+            colors={['#00D9F7', '#0094B4']}
             start={{x: 0, y: 0}}
             end={{x: 0.9, y: 0.9}}
-            style={[styles.RadialEffect, {backgroundColor: '#4698BD'}]}
+            style={[
+              styles.RadialEffect,
+              {backgroundColor: '#4698BD', flexDirection: 'row'},
+            ]}
             // colors={['#5AC2E3', '#4698BD', '#3C84AC']}
           >
+            <Text style={styles.price}>{card.price} DT</Text>
             <Text style={styles.buttonText}>Reserve</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -134,7 +138,11 @@ const FoodInfo = ({card, close, getServices}) => {
         onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <HomeReservation card={card} close={closeModal} />
+            <HomeReservation
+              card={card}
+              close={closeModal}
+              closeParent={close}
+            />
           </View>
         </View>
       </Modal>
@@ -157,7 +165,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginVertical: 40,
   },
-  arrowIcon: {width: 50, resizeMode: 'contain', tintColor: '#000'},
+  arrowIcon: {width: 50, resizeMode: 'contain', tintColor: '#fff'},
   imageContainer: {
     width: windowWidth,
     height: windowWidth,
@@ -207,12 +215,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   price: {
-    color: '#FFD466',
+    color: '#fff',
     fontSize: 24,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 1.5,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   description: {
     color: '#000',
@@ -230,7 +235,7 @@ const styles = StyleSheet.create({
   },
   reserveButton: {
     borderRadius: 15,
-    width: '50%',
+    width: '85%',
     height: windowHeight * 0.06,
     alignSelf: 'center',
     elevation: 5,
@@ -240,12 +245,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
   },
   buttonText: {
-    fontSize: 30,
     color: '#fff',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontSize: 28,
+    fontFamily: 'Poppins-Medium',
   },
   About: {color: '#7f7e81', fontSize: 20, fontWeight: '500'},
   modalContainer: {},
