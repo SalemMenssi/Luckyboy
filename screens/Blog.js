@@ -19,6 +19,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import RadialGradient from 'react-native-radial-gradient';
 import {url} from '../url';
 import axios from 'axios';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Blog = () => {
   const [posts, setPosts] = useState([]);
@@ -242,7 +243,10 @@ const Blog = () => {
       <TouchableOpacity
         style={styles.addPost}
         onPress={() => setModalVisible(true)}>
-        <View
+        <LinearGradient
+          colors={['#0094B4', '#00DAF8']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 0.5, y: 1}}
           style={{
             /*width: '100%',
             height: '100%',
@@ -251,7 +255,7 @@ const Blog = () => {
             backgroundColor: '#5AC2E3',
           }}>
           <Text style={styles.addPostText}>+</Text>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
 
       <Modal
@@ -300,9 +304,13 @@ const Blog = () => {
           )}
           {/* '#5AC2E3', '#4698BD', '#3C84AC' */}
           <TouchableOpacity style={styles.reserveButton} onPress={addPost}>
-            <View style={[styles.RadialEffect, {backgroundColor: '#4698BD'}]}>
+            <LinearGradient
+              colors={['#00D9F7', '#0094B4']}
+              start={{x: 0, y: 0}}
+              end={{x: 0.9, y: 0.9}}
+              style={[styles.RadialEffect, {backgroundColor: '#4698BD'}]}>
               <Text style={styles.buttonText}>Add Post</Text>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.close}
@@ -393,7 +401,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: '#383E44',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     fontSize: 46,
     alignSelf: 'flex-start',
     alignSelf: 'center',
@@ -421,8 +429,8 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: '65%',
-    borderBottomEndRadius: 20,
-    borderBottomStartRadius: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   Content: {},
   postHeader: {
@@ -447,12 +455,12 @@ const styles = StyleSheet.create({
   seeMoreButton: {position: 'absolute', right: 10, bottom: 8},
   seeMoreButtonText: {
     color: '#3C84AC',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     fontSize: 14,
   },
   cardDate: {
     fontSize: 12,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#383E44',
     marginBottom: 5,
   },
@@ -467,7 +475,7 @@ const styles = StyleSheet.create({
   },
   likeIcon: {height: windowWidth * 0.07, width: windowWidth * 0.07, top: 2},
   likedValue: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#383E44',
     fontSize: 26,
     marginHorizontal: 10,
@@ -479,7 +487,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   modalTitle: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#000',
     fontSize: 40,
     alignSelf: 'center',
@@ -487,7 +495,7 @@ const styles = StyleSheet.create({
     marginTop: windowHeight * 0.07,
   },
   label: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#383E44',
     fontSize: 30,
     marginRight: 20,
@@ -531,7 +539,7 @@ const styles = StyleSheet.create({
   arrowIcon: {width: 40, resizeMode: 'contain'},
   aploadContainer: {flexDirection: 'row'},
   reserveButton: {
-    borderRadius: 60,
+    borderRadius: 15,
     width: '50%',
     height: windowHeight * 0.09,
     alignSelf: 'center',
@@ -548,7 +556,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 30,
     color: '#fff',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
   },
 });
 

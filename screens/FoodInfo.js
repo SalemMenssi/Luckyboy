@@ -16,12 +16,16 @@ import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
-const FoodInfo = ({card, close, getServices}) => {
+const FoodInfo = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [Current, setCurrent] = useState({});
+  const route = useRoute();
+  const {card} = route.params;
+  const getServices = route.params.getServices;
   const [likes, setlikes] = useState(card.Likes);
-
+  const navigation = useNavigation();
   useEffect(() => {
     getCurrentUser();
 
@@ -32,7 +36,7 @@ const FoodInfo = ({card, close, getServices}) => {
   };
 
   const closeModal = () => {
-    close();
+    // close();
     setModalVisible(false);
   };
 
@@ -74,7 +78,9 @@ const FoodInfo = ({card, close, getServices}) => {
   };
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.close} onPress={close}>
+      <TouchableOpacity
+        style={styles.close}
+        onPress={() => navigation.goBack()}>
         <Image
           style={styles.arrowIcon}
           source={require('../assets/icons/fleche.png')}
@@ -138,11 +144,7 @@ const FoodInfo = ({card, close, getServices}) => {
         onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <HomeReservation
-              card={card}
-              close={closeModal}
-              closeParent={close}
-            />
+            <HomeReservation card={card} close={closeModal} />
           </View>
         </View>
       </Modal>
@@ -158,6 +160,7 @@ const windowHeight = Dimensions.get('window').height;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   close: {
     position: 'absolute',

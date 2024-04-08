@@ -92,6 +92,7 @@ const Chart = () => {
     requestUserPermission();
     retrieveNotificationData();
     getCurrentUser();
+    console.log(data.datasets);
   }, []);
   useEffect(() => {
     retrieveNotificationData();
@@ -146,6 +147,7 @@ const Chart = () => {
 
     return monthsArray;
   }
+
   function countLast6MonthsOccurrences(dateArray) {
     const monthCounts = {};
     const months = [
@@ -166,6 +168,7 @@ const Chart = () => {
     const currentDate = new Date();
     for (let i = 0; i < 6; i++) {
       const month = currentDate.toLocaleString('default', {month: 'short'});
+
       monthCounts[month] = 0;
       currentDate.setMonth(currentDate.getMonth() - 1);
     }
@@ -179,7 +182,11 @@ const Chart = () => {
       }
     }
 
-    const resultArray = months.map(month => monthCounts[month] || 0);
+    const lastSixMonths = getLast6Months().reverse();
+    const resultArray = lastSixMonths.map(e => monthCounts[e]);
+
+    // Sort the resultArray based on the order of lastSixMonths
+
     return resultArray;
   }
 

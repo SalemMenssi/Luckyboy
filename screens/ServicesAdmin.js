@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 
-import RadialGradient from 'react-native-radial-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import {url} from '../url';
 import axios from 'axios';
 import {Calendar} from 'react-native-calendars';
@@ -304,7 +304,11 @@ const ServicesAdmin = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Activities</Text>
-      <ScrollView style={{maxHeight: windowHeight * 0.75}}>
+      <ScrollView
+        style={{
+          maxHeight: windowHeight * 0.75,
+          marginBottom: windowHeight * 0.12,
+        }}>
         {Services &&
           Services.map(post => (
             <View key={post._id} style={styles.postCard}>
@@ -341,18 +345,16 @@ const ServicesAdmin = () => {
       <TouchableOpacity
         style={styles.addPost}
         onPress={() => setModalVisible(true)}>
-        <View
-          // colors={['#3C84AC', '#5AC2E3', '#3C84AC']}
-
+        <LinearGradient
+          colors={['#0094B4', '#00DAF8']}
+          start={{x: 0, y: 0.5}}
+          end={{x: 0.5, y: 1}}
           style={{
-            /*width: '100%',
-            height: '100%',
-            alignItems: 'center',*/
             justifyContent: 'center',
             backgroundColor: '#5AC2E3',
           }}>
           <Text style={styles.addPostText}>+</Text>
-        </View>
+        </LinearGradient>
       </TouchableOpacity>
 
       <Modal
@@ -409,12 +411,13 @@ const ServicesAdmin = () => {
           )}
 
           <TouchableOpacity style={styles.reserveButton} onPress={addService}>
-            <View
-              style={[styles.RadialEffect, {backgroundColor: '#4698BD'}]}
-              // colors={['#5AC2E3', '#4698BD', '#3C84AC']}
-            >
+            <LinearGradient
+              colors={['#0094B4', '#00DaF8']}
+              start={{x: 0, y: 0}}
+              end={{x: 0.9, y: 0.9}}
+              style={[styles.RadialEffect, {backgroundColor: '#5ac2e3'}]}>
               <Text style={styles.buttonText}>Add Service</Text>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.close}
@@ -599,7 +602,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: '#383E44',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     fontSize: 46,
     alignSelf: 'center',
     marginHorizontal: 20,
@@ -625,9 +628,9 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     width: '100%',
-    height: '60%',
-    borderBottomEndRadius: 20,
-    borderBottomStartRadius: 20,
+    height: '65%',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   Content: {height: '40%', justifyContent: 'space-between'},
   postHeader: {
@@ -652,12 +655,12 @@ const styles = StyleSheet.create({
   seeMoreButton: {position: 'absolute', right: 10, bottom: 13},
   seeMoreButtonText: {
     color: '#3C84AC',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     fontSize: 14,
   },
   cardDate: {
     fontSize: 12,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#383E44',
     marginBottom: 5,
   },
@@ -672,7 +675,7 @@ const styles = StyleSheet.create({
   },
   likeIcon: {height: windowWidth * 0.07, width: windowWidth * 0.07},
   likedValue: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#383E44',
     fontSize: 26,
     marginHorizontal: 10,
@@ -683,7 +686,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fafafa',
   },
   modalTitle: {
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
     color: '#000',
     fontSize: 40,
     alignSelf: 'center',
@@ -732,7 +735,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingTop: 5,
   },
-  close: {position: 'absolute', top: windowHeight * 0.05, left: 20},
+  close: {position: 'absolute', top: 25, left: 0},
   arrowIcon: {width: 40, resizeMode: 'contain'},
   aploadContainer: {
     flexDirection: 'row',
@@ -741,9 +744,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   reserveButton: {
-    borderRadius: 60,
+    borderRadius: 15,
     width: '50%',
-    height: windowHeight * 0.09,
+    height: windowHeight * 0.07,
     alignSelf: 'center',
     elevation: 5,
     overflow: 'hidden',
@@ -759,7 +762,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 25,
     color: '#fff',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
   },
   infoServicecontainer: {
     flexDirection: 'row',
@@ -792,7 +795,7 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 1.5,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Bold',
   },
   informationService: {
     padding: 10,

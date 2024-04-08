@@ -26,6 +26,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon1 from 'react-native-vector-icons/Ionicons';
 import EventInfo from '../EventInfo';
 import messaging from '@react-native-firebase/messaging';
+import {useNavigation} from '@react-navigation/native';
 
 Icon.loadFont();
 const ReservationHistory = () => {
@@ -42,7 +43,7 @@ const ReservationHistory = () => {
   const [notifications, setNotifications] = useState([]);
 
   const fadeAnim = useState(new Animated.Value(0))[0];
-
+  const navigation = useNavigation();
   useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
@@ -55,7 +56,7 @@ const ReservationHistory = () => {
     try {
       const fcmtoken = await messaging().getToken();
       let isSaved = user && user.fcmtoken.includes(fcmtoken);
-      //console.log(fcmtoken);
+      // console.log(fcmtoken);
       if (!isSaved) {
         await updateUserFCMToken(fcmtoken);
       }
@@ -188,8 +189,12 @@ const ReservationHistory = () => {
   };
 
   const handleSeeMore = card => {
-    setSelectedCard(card);
-    setModalVisible(true);
+    navigation.navigate('ReservationCard', {
+      card: card,
+      getServices: () => getServices(),
+    });
+    // setSelectedCard(card);
+    // setModalVisible(true);
   };
   const handleSeeMoreEvent = card => {
     setSelectedEvent(card);
@@ -218,7 +223,7 @@ const ReservationHistory = () => {
         style={styles.header}>
         <TouchableOpacity
           style={styles.notificationContainer}
-          onPress={() => setShowNotif(true)}>
+          onPress={() => navigation.navigate('Notif')}>
           <Icon name="bell" size={20} color="#000" />
           {notifications.length > 0 && (
             <View style={styles.notificationBadge}>
@@ -402,28 +407,6 @@ const ReservationHistory = () => {
           </View>
         </View>
       </Modal>
-      {showNotif ? (
-        <View style={styles.notifbox}>
-          <View style={styles.notifHeader}>
-            <Text style={styles.notifHeaderTitle}>Notifications</Text>
-            <TouchableOpacity
-              style={styles.close}
-              onPress={() => {
-                setShowNotif(false);
-              }}>
-              <Icon name="close" size={20} color="#000" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView>
-            {notifications.map((item, index) => (
-              <View key={index} style={styles.notifitem}>
-                <Text style={styles.notiftitle}>{item.title}</Text>
-                <Text style={styles.notifbody}>{item.body}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      ) : null}
     </ScrollView>
   );
 };
@@ -544,7 +527,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     position: 'relative',
-    height: windowHeight * 0.1,
+    height: windowHeight * 0.11,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -623,14 +606,14 @@ const styles = StyleSheet.create({
     marginTop: 0,
     paddingHorizontal: 20,
     paddingVertical: 40,
-    elevation: 8,
+    elevation: 10,
     shadowColor: '#383e44',
     shadowOffset: {
       width: 0,
       height: 0,
     },
     shadowOpacity: 0.5,
-    shadowRadius: 5,
+    shadowRadius: 10,
   },
   recommendationCard: {
     width: windowWidth * 0.7,
@@ -640,6 +623,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 20,
     backgroundColor: '#fff',
+
     overflow: 'hidden',
   },
   recommendationImage: {
@@ -757,7 +741,7 @@ const styles = StyleSheet.create({
   notifbox: {
     position: 'absolute',
     paddingBottom: 20,
-    width: windowWidth * 0.7,
+    width: windowWidth,
     backgroundColor: '#fff',
     zIndex: 10000,
     borderRadius: 20,
@@ -769,9 +753,8 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 1,
     shadowRadius: 40,
-    top: windowHeight * 0.25,
-    maxHeight: windowHeight * 0.55,
-    minHeight: windowHeight * 0.55,
+    maxHeight: windowHeight,
+    minHeight: windowHeight,
   },
   notifitem: {
     marginBottom: 10,

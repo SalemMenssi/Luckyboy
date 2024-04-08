@@ -2,8 +2,9 @@ import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/FontAwesome5';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {Animated, Dimensions, Image} from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   SignIn,
@@ -20,8 +21,11 @@ import {
   EventAdmin,
   Loading,
   ServicesAdmin,
+  Notification,
+  FoodInfo,
 } from './screens';
 import messaging from '@react-native-firebase/messaging';
+
 const {height, width} = Dimensions.get('window');
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -30,39 +34,24 @@ const User = () => {
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        tabBarIcon: ({color, size}) => {
-          let iconName;
-
-          if (route.name === 'Event') {
-            iconName = 'star-o';
-          } else if (route.name === 'Profil') {
-            iconName = 'user-o';
-          } else if (route.name === 'Blog') {
-            iconName = 'wechat';
-          } else if (route.name === 'Store') {
-            iconName = 'shopping-bag';
-          } else if (route.name === 'Reserve') {
-            iconName = 'calendar-o';
-          } else if (route.name === 'Service') {
-            iconName = 'calendar';
-          }
-
-          return <Icon name={iconName} size={size} color={color} />;
-        },
         tabBarActiveTintColor: '#3C84AC',
 
         tabBarInactiveTintColor: '#383E44',
         tabBarStyle: {
           position: 'absolute',
-          elevation: 50,
+          elevation: 10,
           shadowOffset: {
             width: 0,
             height: 15,
           },
           shadowOpacity: 1,
-          shadowRadius: 16.0,
+          shadowRadius: 16.5,
           shadowColor: '#000',
           borderTopLeftRadius: 21,
+          borderTopWidth: 3,
+          borderLeftWidth: 1,
+          borderRightWidth: 1,
+          borderColor: '#d8d8d8',
           borderTopRightRadius: 21,
           backgroundColor: '#fff',
           borderTopLeftRadius: 60,
@@ -80,7 +69,7 @@ const User = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activstar.png')
@@ -100,7 +89,7 @@ const User = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activscheduel.png')
@@ -120,7 +109,7 @@ const User = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activchart.png')
@@ -140,7 +129,7 @@ const User = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activblog.png')
@@ -160,7 +149,7 @@ const User = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activprofile.png')
@@ -227,7 +216,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activcart.png')
@@ -247,7 +236,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activscheduel.png')
@@ -267,7 +256,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activevent.png')
@@ -287,7 +276,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size + 1, height: size + 1, top: 15}}
+                style={{width: size + 1, height: size + 1, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activservice.png')
@@ -307,7 +296,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activchart.png')
@@ -327,7 +316,7 @@ const Admin = () => {
             return (
               <Image
                 resizeMode="contain"
-                style={{width: size, height: size, top: 15}}
+                style={{width: size, height: size, top: 5}}
                 source={
                   focused
                     ? require('./assets/TapBarIcon/activblog.png')
@@ -348,7 +337,8 @@ const MyStack = () => {
       screenOptions={{headerShown: false}}
       initialRouteName="Home">
       <Stack.Screen name="SignIn" component={SignIn} />
-      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="ReservationCard" component={FoodInfo} />
+      <Stack.Screen name="Notif" component={Notification} />
       <Stack.Screen name="User" component={User} />
       <Stack.Screen name="Admin" component={Admin} />
       <Stack.Screen name="Home" component={Home} />
@@ -366,8 +356,6 @@ const App = () => {
 
       if (enabled) {
         console.log('Authorization status:', authStatus);
-      } else {
-        console.warn('User did not grant permission for notifications.');
       }
     } catch (error) {
       console.error('Error requesting permission:', error);
@@ -375,6 +363,8 @@ const App = () => {
   };
 
   messaging().onMessage(async remoteMessage => {
+    console.log('FCM Message Data:', remoteMessage.data);
+
     try {
       const notifications = JSON.parse(
         (await AsyncStorage.getItem('notifs')) || '[]',
@@ -395,25 +385,15 @@ const App = () => {
       console.error('Error saving notification data to AsyncStorage:', error);
     }
   });
-
   messaging().onNotificationOpenedApp(remoteMessage => {
-    try {
-      console.log(
-        'Notification caused app to open from background state:',
-        remoteMessage.notification,
-      );
-    } catch (error) {
-      console.error('Error handling notification opening:', error);
-    }
+    console.log(
+      'Notification caused app to open from background state:',
+      remoteMessage.notification,
+    );
   });
-
   messaging().setBackgroundMessageHandler(async remoteMessage => {
-    try {
-      console.log('Message handled in the background!', remoteMessage);
-      // Save the notification data to AsyncStorage or handle as needed
-    } catch (error) {
-      console.error('Error handling background message:', error);
-    }
+    console.log('Message handled in the background!', remoteMessage);
+    // Save the notification data to AsyncStorage or handle as needed
   });
 
   useEffect(() => {

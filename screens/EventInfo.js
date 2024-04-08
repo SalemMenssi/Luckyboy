@@ -16,6 +16,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
 import Icon from 'react-native-vector-icons/Ionicons';
+import LinearGradient from 'react-native-linear-gradient';
 Icon.loadFont();
 const EventInfo = ({card, close, getEvents}) => {
   const [isparticipate, setisParticipate] = useState(card.participants);
@@ -145,41 +146,43 @@ const EventInfo = ({card, close, getEvents}) => {
 
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
-          <View style={styles.LikeAndPriceContainer}>
-            <Text style={styles.price}>{card.title}</Text>
-            <View style={styles.icons}>
-              <View style={styles.LikeContainer}>
-                <Icon name="people" size={windowWidth * 0.07} color="#000" />
-                <Text style={[styles.likedValue, {color: '#000'}]}>
-                  {isparticipate.some(e => e._id === Current._id)
-                    ? card.participants.length + 1
-                    : card.participants.length}
-                </Text>
-              </View>
-              <View style={styles.LikeContainer}>
-                <TouchableOpacity
-                  onPress={() => {
-                    card.likes.includes(Current._id)
-                      ? (UnlikeEvent(card),
-                        setlikes(card.likes.filter(e => e !== Current._id)))
-                      : (likeEvent(card),
-                        setlikes([...card.likes, Current._id]));
-                  }}>
-                  <Image
-                    style={styles.likeIcon}
-                    source={
-                      likes.includes(Current._id)
-                        ? require('../assets/icons/FullHeart.png')
-                        : require('../assets/icons/heart.png')
-                    }
-                  />
-                </TouchableOpacity>
-                <Text style={styles.likedValue}>{likes.length}</Text>
-              </View>
+          <View style={styles.icons}>
+            <View style={styles.LikeContainer}>
+              <Icon
+                name="people-outline"
+                size={windowWidth * 0.07}
+                color="#00DAF8"
+              />
+              <Text style={[styles.likedValue, {color: '#00DAF8'}]}>
+                {isparticipate.some(e => e._id === Current._id)
+                  ? card.participants.length + 1
+                  : card.participants.length}
+              </Text>
+            </View>
+            <View style={styles.LikeContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  card.likes.includes(Current._id)
+                    ? (UnlikeEvent(card),
+                      setlikes(card.likes.filter(e => e !== Current._id)))
+                    : (likeEvent(card), setlikes([...card.likes, Current._id]));
+                }}>
+                <Image
+                  style={styles.likeIcon}
+                  source={
+                    likes.includes(Current._id)
+                      ? require('../assets/icons/FullHeart.png')
+                      : require('../assets/icons/heart.png')
+                  }
+                />
+              </TouchableOpacity>
+              <Text style={styles.likedValue}>{likes.length}</Text>
             </View>
           </View>
-
-          <Text style={styles.description}>{card.description}</Text>
+          <View style={styles.LikeAndPriceContainer}>
+            <Text style={styles.price}>{card.title}</Text>
+            <Text style={styles.description}>{card.description}</Text>
+          </View>
         </View>
         <View style={styles.infoEventcontainer}>
           <View style={styles.infoEvent}>
@@ -209,9 +212,7 @@ const EventInfo = ({card, close, getEvents}) => {
           </View>
         </View>
         {/* #c73244  */}
-        <TouchableOpacity
-          style={[
-            styles.reserveButton,
+        {/*,
             !isparticipate.some(e => e._id === Current._id)
               ? {backgroundColor: '#FFD466'}
               : {
@@ -220,7 +221,10 @@ const EventInfo = ({card, close, getEvents}) => {
                   borderWidth: 2,
                   borderColor: '#F68A72',
                   color: '#F68A72',
-                },
+                },*/}
+        <TouchableOpacity
+          style={[
+            styles.reserveButton,
             // {
             //   backgroundColor: `${
             //     !isparticipate.some(e => e._id === Current._id)
@@ -238,21 +242,17 @@ const EventInfo = ({card, close, getEvents}) => {
               : (participate(),
                 setisParticipate([...card.participants, Current]));
           }}>
-          <Text
-            style={[
-              styles.buttonText,
-              {
-                color: `${
-                  !isparticipate.some(e => e._id === Current._id)
-                    ? '#383E44'
-                    : '#c73244'
-                }`,
-              },
-            ]}>
-            {isparticipate.some(e => e._id === Current._id)
-              ? 'Cancel'
-              : 'Participate'}
-          </Text>
+          <LinearGradient
+            colors={['#00D9F7', '#0094B4']}
+            start={{x: 0, y: 0}}
+            end={{x: 0.9, y: 0.9}}
+            style={styles.RadialEffect}>
+            <Text style={[styles.buttonText]}>
+              {isparticipate.some(e => e._id === Current._id)
+                ? 'Cancel'
+                : 'Participate'}
+            </Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -277,10 +277,11 @@ const styles = StyleSheet.create({
   arrowIcon: {
     width: 40,
     resizeMode: 'contain',
+    tintColor: '#fff',
   },
   imageContainer: {
     width: windowWidth,
-    height: windowWidth,
+    height: windowHeight * 0.53,
     alignItems: 'flex-start',
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
@@ -289,7 +290,7 @@ const styles = StyleSheet.create({
   infoContainer: {
     backgroundColor: '#fff',
     paddingVertical: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     height: windowHeight * 0.5,
     borderTopLeftRadius: 60,
     justifyContent: 'space-between',
@@ -303,14 +304,9 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 5,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
-  LikeAndPriceContainer: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 30,
-  },
+  LikeAndPriceContainer: {marginVertical: windowHeight * 0.03},
   LikeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -325,19 +321,15 @@ const styles = StyleSheet.create({
   price: {
     color: '#383E44',
     fontSize: 36,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: -1, height: 1},
-    textShadowRadius: 1.5,
-    fontFamily: 'OriginalSurfer-Regular',
+
+    fontFamily: 'Poppins-Medium',
   },
   description: {
     color: '#000',
     fontSize: 16,
     lineHeight: windowHeight * 0.035,
-    fontFamily: 'OriginalSurfer-Regular',
-    marginTop: windowHeight * 0.04,
-    paddingHorizontal: windowWidth * 0.05,
-    textAlign: 'center',
+    fontFamily: 'Poppins-Medium',
+    marginTop: windowHeight * 0.02,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -346,23 +338,18 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   reserveButton: {
-    paddingHorizontal: 50,
+    borderRadius: 15,
+    width: '50%',
+    height: windowHeight * 0.06,
     alignSelf: 'center',
-    paddingVertical: 10,
-
-    borderRadius: 10,
     elevation: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  RadialEffect: {
-    width: '100%',
-    height: '100%',
-  },
+
   buttonText: {
     fontSize: 26,
-    color: '#383E44',
-    fontFamily: 'OriginalSurfer-Regular',
+    color: '#fff',
+    fontFamily: 'Poppins-Medium',
   },
   About: {color: '#7f7e81', fontSize: 20, fontWeight: '500'},
   modalContainer: {},
@@ -383,5 +370,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 5,
   },
-  icons: {flexDirection: 'row', marginVertical: 10},
+  icons: {
+    flexDirection: 'row',
+    marginVertical: 10,
+    justifyContent: 'space-between',
+  },
+  RadialEffect: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    justifyContent: 'center',
+  },
 });

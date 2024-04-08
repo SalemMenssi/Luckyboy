@@ -341,7 +341,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     color: '#0A0A0A',
     backgroundColor: '#fff',
-    elevation: 5,
   },
   calendarBox: {
     height: windowHeight * 0.37,

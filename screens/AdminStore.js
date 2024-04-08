@@ -316,6 +316,7 @@ const AdminStore = () => {
       setDataToedit('');
       await getProducts();
       setTitleChangingVisible(false);
+      setModalVisible(true);
     } catch (error) {
       console.log(error);
     }
@@ -330,6 +331,7 @@ const AdminStore = () => {
       setDataToedit('');
       await getProducts();
       setPriceChangingVisible(false);
+      setModalVisible(true);
     } catch (error) {
       console.log(error);
     }
@@ -344,6 +346,7 @@ const AdminStore = () => {
       setDataToedit('');
       await getProducts();
       setDescChangingVisible(false);
+      setModalVisible(true);
     } catch (error) {
       console.log(error);
     }
@@ -360,6 +363,7 @@ const AdminStore = () => {
       });
       await getProducts();
       setCategoryChangingVisible(false);
+      setModalVisible(true);
     } catch (error) {
       console.log(error);
     }
@@ -413,7 +417,6 @@ const AdminStore = () => {
         </ScrollView>
 
         {/* Popular */}
-        <Text style={styles.subtitle}>Popular</Text>
 
         <ScrollView
           contentContainerStyle={[
@@ -422,15 +425,22 @@ const AdminStore = () => {
           ]}
           showsHorizontalScrollIndicator={false}>
           {filtredCard.map((card, index) => (
-            <ImageBackground
-              source={{uri: `${url}${card.image.url}`}}
-              resizeMode="cover"
-              style={styles.card}
-              key={index}>
+            <View style={styles.card} key={index}>
+              <Image
+                source={{uri: `${url}${card.image.url}`}}
+                resizeMode="cover"
+                style={{
+                  width: '105%',
+                  height: '60%',
+                  resizeMode: 'cover',
+                  borderTopEndRadius: 5,
+                  borderTopStartRadius: 5,
+                }}
+              />
               <View style={styles.cardContent}>
                 <View style={styles.content}>
                   <View style={styles.ContentHead}>
-                    <Text style={styles.cardCategerie}>{card.categorie}</Text>
+                    {/*<Text style={styles.cardCategerie}>{card.categorie}</Text>*/}
                     <Text style={styles.cardTitle}>{card.title}</Text>
                   </View>
                   <View style={styles.likedBox}>
@@ -447,13 +457,13 @@ const AdminStore = () => {
                     <Icon1
                       style={styles.basketIcon}
                       size={20}
-                      color="#fff"
+                      color="#0094b4"
                       name="edit"
                     />
                   </TouchableOpacity>
                 </View>
               </View>
-            </ImageBackground>
+            </View>
           ))}
         </ScrollView>
       </View>
@@ -479,13 +489,11 @@ const AdminStore = () => {
               source={require('../assets/icons/fleche.png')}
             />
             <TouchableOpacity
-              style={[
-                styles.uploadButton,
-                {
-                  marginTop: windowHeight * 0.3,
-                  marginLeft: windowWidth * 0.7,
-                },
-              ]}
+              style={{
+                position: 'absolute',
+                marginTop: windowHeight * 0.46,
+                marginLeft: windowWidth * 0.7,
+              }}
               onPress={() => handleUpdateImage(selectedProduct._id)}>
               <Image
                 source={require('../assets/icons/aploadImagePostIcon.png')}
@@ -495,9 +503,12 @@ const AdminStore = () => {
           <TouchableOpacity
             style={[
               styles.close,
-              {alignSelf: 'flex-end', top: windowHeight * 0.47, right: 30},
+              {alignSelf: 'flex-end', top: windowHeight * 0.53, right: 30},
             ]}
-            onPress={() => setModalAlertVisible(true)}>
+            onPress={() => {
+              setModalVisible(false);
+              setModalAlertVisible(true);
+            }}>
             <Image
               style={{width: 40, height: 40, resizeMode: 'contain'}}
               source={require('../assets/icons/deleteIcon.png')}
@@ -519,6 +530,7 @@ const AdminStore = () => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
+                    setModalVisible(false);
                     setTitleChangingVisible(true);
                     setDataToedit(selectedProduct.title);
                   }}>
@@ -531,6 +543,7 @@ const AdminStore = () => {
                 } DT`}</Text>
                 <TouchableOpacity
                   onPress={() => {
+                    setModalVisible(false);
                     setPriceChangingVisible(true);
                     setDataToedit(selectedProduct.price + '');
                   }}>
@@ -547,8 +560,10 @@ const AdminStore = () => {
                         : selectedProduct.categorie == 'Tools'
                         ? '2'
                         : '3';
+
                     setNewProductCategory(newCategory);
                     console.log(NewProductCategory);
+                    setModalVisible(false);
                     setCategoryChangingVisible(true);
                   }}>
                   <Image source={require('../assets/icons/edit.png')} />
@@ -564,6 +579,7 @@ const AdminStore = () => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => {
+                    setModalVisible(false);
                     setDescChangingVisible(true);
                     setDataToedit(selectedProduct.description);
                   }}>
@@ -599,7 +615,7 @@ const AdminStore = () => {
         onRequestClose={() => setModalCartVisible(false)}>
         <View style={styles.cartContainer}>
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Add Item </Text>
+            <Text style={styles.formTitle}>Add Item</Text>
             <Text style={styles.formSubTitle}>Name</Text>
             <TextInput
               style={styles.input}
@@ -626,24 +642,44 @@ const AdminStore = () => {
                 marginLeft: windowWidth * 0.1,
               }}
             />
-            <Text style={styles.formSubTitle}>Upload Photo</Text>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.formSubTitle}>Upload Photo</Text>
 
-            <TouchableOpacity
-              onPress={handleImageUpload}
-              style={styles.uploadButton}>
+              <TouchableOpacity
+                onPress={handleImageUpload}
+                style={styles.uploadButton}>
+                <Image
+                  source={require('../assets/icons/aploadImagePostIcon.png')}
+                />
+              </TouchableOpacity>
+            </View>
+            {NewProductImage && (
               <Image
-                source={require('../assets/icons/aploadImagePostIcon.png')}
+                source={{uri: `${url}${NewProductImage.url}`}}
+                style={{
+                  width: 100,
+                  height: 100,
+                  resizeMode: 'cover',
+                  borderRadius: 10,
+                  marginTop: 10,
+                }}
               />
-            </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[styles.reserveButton, {marginTop: windowHeight * 0.05}]}
               onPress={handelAddProduct}>
-              <View
-                style={[styles.RadialEffect, {backgroundColor: '#5AC2E3'}]}
+              <LinearGradient
+                colors={['#00D9F7', '#0094B4']}
+                start={{x: 0, y: 0}}
+                end={{x: 0.9, y: 0.9}}
+                style={[
+                  styles.RadialEffect,
+                  {backgroundColor: '#4698BD', flexDirection: 'row'},
+                ]}
                 // colors={['#5AC2E3', '#4698BD', '#3C84AC']}
               >
                 <Text style={styles.buttonText}>Add Item</Text>
-              </View>
+              </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.close}
@@ -676,7 +712,10 @@ const AdminStore = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setModalAlertVisible(false)}>
+                onPress={() => {
+                  setModalAlertVisible(false);
+                  setModalVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -712,7 +751,10 @@ const AdminStore = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setTitleChangingVisible(false)}>
+                onPress={() => {
+                  setTitleChangingVisible(false);
+                  setModalVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -739,7 +781,7 @@ const AdminStore = () => {
               source={require('../assets/icons/edit.png')} // Replace with your image source
               style={styles.AlertmodalImage}
             />
-            <Text style={styles.AlertmodalTitle}>Edit{NewProductCategory}</Text>
+            <Text style={styles.AlertmodalTitle}>Edit</Text>
             <RadioGroup
               radioButtons={radioButtons}
               onPress={setNewProductCategory}
@@ -753,7 +795,10 @@ const AdminStore = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setCategoryChangingVisible(false)}>
+                onPress={() => {
+                  setCategoryChangingVisible(false);
+                  setModalVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -790,7 +835,10 @@ const AdminStore = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setDescChangingVisible(false)}>
+                onPress={() => {
+                  setDescChangingVisible(false);
+                  setModalVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -828,7 +876,10 @@ const AdminStore = () => {
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={[styles.exitModalButton, styles.cancelButton]}
-                onPress={() => setPriceChangingVisible(false)}>
+                onPress={() => {
+                  setPriceChangingVisible(false);
+                  setModalVisible(true);
+                }}>
                 <Text style={[styles.buttonText, {color: '#0080B2'}]}>No</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -861,7 +912,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     alignSelf: 'center',
     marginBottom: windowHeight * 0.015,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 2,
   },
   subtitle: {
@@ -890,7 +941,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.5,
     shadowRadius: 10,
-    overflow: 'hidden',
     marginHorizontal: 10,
   },
   cardImage: {},
@@ -900,7 +950,7 @@ const styles = StyleSheet.create({
     height: '40%',
     paddingHorizontal: 10,
     paddingVertical: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'white',
     transform: 'scale(1.05)',
   },
   content: {
@@ -920,12 +970,9 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontFamily: 'Poppins-Regular',
 
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 22,
+    color: '#000',
     marginVertical: 0,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 4,
   },
   cardDescription: {},
   cardButton: {
@@ -949,12 +996,10 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   cardPrice: {
-    color: '#FFD466',
+    color: '#0094b4',
     fontSize: 24,
-    textShadowColor: 'rgba(255, 255, 255, 0.5)',
-    textShadowOffset: {width: 1, height: 1},
-    textShadowRadius: 1.5,
-    fontFamily: 'OriginalSurfer-Regular',
+
+    fontFamily: 'Poppins-Medium',
     alignSelf: 'flex-end',
   },
   modalContainer: {
@@ -979,7 +1024,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
 
     color: '#000',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     margin: 10,
   },
   modalPrice: {
@@ -1093,7 +1138,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     marginBottom: 20,
     color: '#3C84AC',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   cartItemsContainer: {
     flexGrow: 1,
@@ -1127,7 +1172,7 @@ const styles = StyleSheet.create({
     textShadowColor: '#383E44',
     textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 2,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   cartItemRemove: {position: 'absolute', right: 10},
   basketBottom: {
@@ -1196,7 +1241,7 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 1.5,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -1250,11 +1295,18 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    height: windowHeight * 0.53,
+    height: windowHeight * 0.58,
     borderTopLeftRadius: 60,
     justifyContent: 'space-between',
-    overflow: 'hidden',
-    top: windowHeight * -0.12,
+    top: windowHeight * -0.1,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 1,
+      height: -20,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 40,
+    elevation: 5,
   },
   infoRow: {},
   title: {
@@ -1263,7 +1315,7 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 5,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     marginVertical: 10,
     marginBottom: 20,
     marginRight: 10,
@@ -1287,26 +1339,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   price: {
-    color: '#FFD466',
+    color: '#FFc444',
     fontSize: 32,
     textShadowColor: 'rgba(0, 0, 0, 0.7)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 2,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   description: {
     color: '#666',
     fontSize: 16,
 
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     marginTop: 5,
     paddingHorizontal: windowWidth * 0.05,
   },
 
   reserveButton: {
-    borderRadius: 60,
-    width: '60%',
-    height: windowHeight * 0.08,
+    borderRadius: 15,
+    width: '50%',
+    height: windowHeight * 0.07,
     alignSelf: 'center',
     elevation: 5,
     overflow: 'hidden',
@@ -1320,7 +1372,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 30,
     color: '#fff',
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
   },
   About: {color: '#383E44', fontSize: 18, fontWeight: '500'},
   carteButtonContainer: {
@@ -1336,14 +1388,14 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 30,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     color: '#383E44',
     marginTop: windowHeight * 0.1,
     alignSelf: 'center',
   },
   formSubTitle: {
     fontSize: 24,
-    fontFamily: 'OriginalSurfer-Regular',
+    fontFamily: 'Poppins-Medium',
     color: '#383E44',
     marginTop: windowHeight * 0.02,
     marginBottom: windowHeight * 0.02,
@@ -1363,7 +1415,7 @@ const styles = StyleSheet.create({
     marginLeft: windowWidth * 0.1,
     fontSize: 20,
   },
-  uploadButton: {marginLeft: windowWidth * 0.15},
+  uploadButton: {marginTop: windowWidth * 0.03, marginLeft: windowWidth * 0.05},
   AlertmodalContainer: {
     flex: 1,
     justifyContent: 'center',
